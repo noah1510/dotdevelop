@@ -22,10 +22,15 @@ THERE IS NO EDITOR, so it's not usefull.
 Please, **don't checkout branch dotdevelop!** 
 Maybe it will be deleted and rebased on our first release.
 
-To hack around on version 8.6, get a compiling copy from branch dotdevelop_8 as follows:
+Currently the best working branch is:
+
+https://github.com/dotdevelop/dotdevelop/tree/dotdevelop_oe_8.1.5
+
+
+To hack around on version 8.1.5, get a compiling copy from branch dotdevelop_oe_8.1.5 as follows:
 
 ```
-git clone -b dotdevelop_8 https://github.com/dotdevelop/dotdevelop.git
+git clone -b dotdevelop_oe_8.1.5 https://github.com/dotdevelop/dotdevelop.git
 
 cd dotdevelop/
 
@@ -33,9 +38,6 @@ cd dotdevelop/
 
 make
 
-cd main
-
-msbuild -r -p:Configuration=DebugGnome
 ```
 
 
