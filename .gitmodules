@@ -44,3 +44,15 @@
 	path = main/external/vs-editor-api
 	url = https://github.com/dotdevelop/vs-editor-api.git
     branch = dotdevelop_oe_8.1.5
+[submodule "main/external/libgit-binary"]
+	path = main/external/libgit-binary
+	url = git://github.com/dotdevelop/libgit-binary.git
+	branch = vs-8.0-v0.26.8
+[submodule "main/external/libgit2"]
+	path = main/external/libgit2
+	url = git://github.com/dotdevelop/libgit2.git
+	branch = vs-8.0-v0.26.8
+[submodule "main/external/libgit2sharp"]
+	path = main/external/libgit2sharp
+	url = git://github.com/dotdevelop/libgit2sharp.git
+	branch = dotdevelop
