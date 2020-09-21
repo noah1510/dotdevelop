@@ -465,6 +465,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TextUICommon", "external\vs
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TextUIGtkUtil", "external\vs-editor-api\src\Editor\Text\Util\TextUIGtkUtil\TextUIGtkUtil.csproj", "{209B27AE-712E-4B87-8846-BB149874D44E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MonoDevelop.VersionControl.Git", "src\addins\VersionControl\MonoDevelop.VersionControl.Git\MonoDevelop.VersionControl.Git.csproj", "{0413DB7D-8B35-423F-9752-D75C9225E7DE}"
+EndProject
 
 
 
@@ -2731,6 +2733,22 @@ Global
 
 
 
+		{0413DB7D-8B35-423F-9752-D75C9225E7DE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0413DB7D-8B35-423F-9752-D75C9225E7DE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0413DB7D-8B35-423F-9752-D75C9225E7DE}.DebugGnome|Any CPU.ActiveCfg = DebugGnome|Any CPU
+		{0413DB7D-8B35-423F-9752-D75C9225E7DE}.DebugGnome|Any CPU.Build.0 = DebugGnome|Any CPU
+		{0413DB7D-8B35-423F-9752-D75C9225E7DE}.DebugMac|Any CPU.ActiveCfg = DebugMac|Any CPU
+		{0413DB7D-8B35-423F-9752-D75C9225E7DE}.DebugMac|Any CPU.Build.0 = DebugMac|Any CPU
+		{0413DB7D-8B35-423F-9752-D75C9225E7DE}.DebugWin32|Any CPU.ActiveCfg = DebugWin32|Any CPU
+		{0413DB7D-8B35-423F-9752-D75C9225E7DE}.DebugWin32|Any CPU.Build.0 = DebugWin32|Any CPU
+		{0413DB7D-8B35-423F-9752-D75C9225E7DE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0413DB7D-8B35-423F-9752-D75C9225E7DE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0413DB7D-8B35-423F-9752-D75C9225E7DE}.ReleaseGnome|Any CPU.ActiveCfg = ReleaseGnome|Any CPU
+		{0413DB7D-8B35-423F-9752-D75C9225E7DE}.ReleaseGnome|Any CPU.Build.0 = ReleaseGnome|Any CPU
+		{0413DB7D-8B35-423F-9752-D75C9225E7DE}.ReleaseMac|Any CPU.ActiveCfg = ReleaseMac|Any CPU
+		{0413DB7D-8B35-423F-9752-D75C9225E7DE}.ReleaseMac|Any CPU.Build.0 = ReleaseMac|Any CPU
+		{0413DB7D-8B35-423F-9752-D75C9225E7DE}.ReleaseWin32|Any CPU.ActiveCfg = ReleaseWin32|Any CPU
+		{0413DB7D-8B35-423F-9752-D75C9225E7DE}.ReleaseWin32|Any CPU.Build.0 = ReleaseWin32|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -2948,6 +2966,7 @@ Global
 
 
 
+		{0413DB7D-8B35-423F-9752-D75C9225E7DE} = {DEEB9163-3966-4E5E-9AB5-FBB3E01AC82A}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {856CF524-E2A7-4DB0-B80F-8F1B080A2E25}
