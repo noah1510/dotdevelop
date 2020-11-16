@@ -59,18 +59,9 @@ Bear in mind that if you are installing under a custom prefix, you may need to m
 *(It's possible that you need to install for your locale to be
 correctly set.)*
 
-Packaging for OS X
------------------
-
-To package MonoDevelop for OS X in a convenient MonoDevelop.app
-file, just do this after MonoDevelop has finished building (with
-`make`): `cd main/build/MacOSX ; make app`.
-You can run MonoDevelop: `open MonoDevelop.app` or build dmg package: `./make-dmg-bundle.sh`
-
 Dependencies
 ------------
 
-- [Windows](https://github.com/mono/md-website/blob/gh-pages/developers/building-monodevelop.md#prerequisites-and-source)
 - [Unix](http://www.monodevelop.com/developers/building-monodevelop/#linux)
 
 Special Environment Variables
@@ -110,11 +101,7 @@ References
 Discussion, Bugs, Patches
 -------------------------
 
-monodevelop-list@lists.ximian.com *(questions and discussion)*
+https://github.com/dotdevelop/community *(questions and discussion)*
 
-monodevelop-patches-list@lists.ximian.com *(track commits to MonoDevelop)*
-
-monodevelop-bugs@lists.ximian.com *(track MonoDevelop bugzilla component)*
-
-http://bugzilla.xamarin.com *(submit bugs and patches here)*
+https://github.com/dotdevelop/dotdevelop/issues
 
