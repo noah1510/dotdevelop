@@ -44,9 +44,8 @@ You can run MonoDevelop from the build directory by executing:
 Debugging
 ---------
 
-You can debug MonoDevelop using Visual Studio (on Windows or macOS) with the
-`main/Main.sln` solution. Use the `DebugWin32` configuration on Windows and the
-`DebugMac` configuration on macOS.
+You can debug MonoDevelop using Visual Studio (on Linux) with the `main/Main.sln` solution. 
+Use the `DebugGnome` configuration on Linux.
 
 Installing *(Optional)*
 ----------
