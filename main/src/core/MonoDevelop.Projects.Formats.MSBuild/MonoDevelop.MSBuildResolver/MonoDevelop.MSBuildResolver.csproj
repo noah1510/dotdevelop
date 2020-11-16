@@ -7,8 +7,8 @@
 <!--    &lt;!&ndash; this is loaded by MSBuild, so framework should match MSBuild &ndash;&gt;-->
 <!--    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>-->
     <TargetFrameworkVersion>$(MDFrameworkVersion)</TargetFrameworkVersion>
-    <TargetFrameworks>$(MDFrameworkVersion)</TargetFrameworks>
-    <TargetFrameworkVersion Condition="'$(VisualStudioVersion)'=='16.0'">v4.7.2</TargetFrameworkVersion>
+<!--    <TargetFramework>$(MDFrameworkVersion)</TargetFramework>-->
+<!--    <TargetFrameworkVersion Condition="'$(VisualStudioVersion)'=='16.0'">v4.7.2</TargetFrameworkVersion>-->
     <MSBuild_OSS_BinDir Condition="'$(OS)' == 'Windows_NT'">$(MSBuildToolsPath)\</MSBuild_OSS_BinDir>
     <!-- when building with xbuild on Unix, $(MSBuildToolsPath) is like `$prefix/lib/mono/xbuild/*/bin`
 	 when building with msbuild on Unix, $(MSBuildToolsPath) is like `$prefix/lib/mono/msbuild/*/bin`
