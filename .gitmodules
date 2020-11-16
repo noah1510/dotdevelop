@@ -42,4 +42,5 @@
 	branch = d16-2
 [submodule "main/external/vs-editor-api"]
 	path = main/external/vs-editor-api
-	url = https://github.com/thassin/vs-editor-api.git
+	url = https://github.com/dotdevelop/vs-editor-api.git
+    branch = dotdevelop_oe_8.1.5
