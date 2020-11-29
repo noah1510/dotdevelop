@@ -512,22 +512,23 @@ namespace MonoDevelop.Components.Commands
 			// KeyboardShortcut[] accels = 
 			KeyBindingManager.AccelsFromKey (e.Event, out complete);
 
-			if (currentEvent != null &&
-				currentEvent.Type == AppKit.NSEventType.KeyUp &&
-				firstResponder is AppKit.NSView view &&
-				view != window.ContentView) {
+// oe NOTICE somthing mac-related added here? not existing in MD-8.3.
 
-				view.KeyUp (currentEvent);
-				SimulateViewKeyActionBehaviour (view, currentEvent);
-				retVal = true;
-			}
+		//oe	if (currentEvent != null &&
+		//oe		currentEvent.Type == AppKit.NSEventType.KeyUp &&
+		//oe		firstResponder is AppKit.NSView view &&
+		//oe		view != window.ContentView) {
+		//oe		view.KeyUp (currentEvent);
+		//oe		SimulateViewKeyActionBehaviour (view, currentEvent);
+		//oe		retVal = true;
+		//oe	}
 
 			if (!complete) {
 				// incomplete accel
 				NotifyIncompleteKeyReleased (e.Event);
 			}
 
-			e.RetVal = retVal;
+		//oe	e.RetVal = retVal;
 		}
 
 		internal bool ProcessKeyEvent (Gdk.EventKey ev)
@@ -2426,8 +2427,10 @@ namespace MonoDevelop.Components.Commands
 		Gtk.Widget GetFocusedChild (Control widget)
 		{
 			Gtk.Container container;
-			if (widget?.nativeWidget is AppKit.NSWindow window)
-				widget = Mac.GtkMacInterop.GetGtkWindow (window)?.Child;
+
+		//oe	if (widget?.nativeWidget is AppKit.NSWindow window)
+		//oe		widget = Mac.GtkMacInterop.GetGtkWindow (window)?.Child;
+
 			do {
 				container = widget?.nativeWidget is Gtk.Container ? widget.GetNativeWidget<Gtk.Container> () : null;
 				if (container != null) {

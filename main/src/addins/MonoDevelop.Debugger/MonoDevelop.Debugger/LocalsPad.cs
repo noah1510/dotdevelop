@@ -25,7 +25,10 @@
 //
 //
 
+using System.Linq;
 using Mono.Debugging.Client;
+
+// oe REVERTED from MD-8.3.
 
 namespace MonoDevelop.Debugger
 {
@@ -33,34 +36,9 @@ namespace MonoDevelop.Debugger
 	{
 		public LocalsPad ()
 		{
-			if (UseNewTreeView) {
-				controller.AllowEditing = true;
-			} else {
-				tree.AllowEditing = true;
-				tree.AllowAdding = false;
-			}
+			tree.AllowEditing = true;
+			tree.AllowAdding = false;
 		}
-
-#if ADD_FAKE_NODES
-		void AddFakeNodes ()
-		{
-			var xx = new System.Collections.Generic.List<ObjectValueNode> ();
-
-			xx.Add (new FakeObjectValueNode ("f1"));
-			xx.Add (new FakeIsImplicitNotSupportedObjectValueNode ());
-
-			xx.Add (new FakeEvaluatingGroupObjectValueNode (1));
-			xx.Add (new FakeEvaluatingGroupObjectValueNode (0));
-			xx.Add (new FakeEvaluatingGroupObjectValueNode (5));
-
-			xx.Add (new FakeEvaluatingObjectValueNode ());
-			xx.Add (new FakeEnumerableObjectValueNode (10));
-			xx.Add (new FakeEnumerableObjectValueNode (20));
-			xx.Add (new FakeEnumerableObjectValueNode (23));
-
-			controller.AddValues (xx);
-		}
-#endif
 
 		void ReloadValues ()
 		{
@@ -76,21 +54,8 @@ namespace MonoDevelop.Debugger
 				DebuggerLoggingService.LogMessage ("\t{0}", local.Name);
 			DebuggerLoggingService.LogMessage ("End Local Variables");
 
-			if (UseNewTreeView) {
-				_treeview.BeginUpdates ();
-				try {
-					controller.ClearValues ();
-					controller.AddValues (locals);
-				} finally {
-					_treeview.EndUpdates ();
-				}
-#if ADD_FAKE_NODES
-				AddFakeNodes ();
-#endif
-			} else {
-				tree.ClearValues ();
-				tree.AddValues (locals);
-			}
+			tree.ClearValues ();
+			tree.AddValues (locals);
 		}
 
 		public override void OnUpdateFrame ()

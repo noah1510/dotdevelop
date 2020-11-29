@@ -31,6 +31,8 @@ using MonoDevelop.Components.AtkCocoaHelper;
 using MonoDevelop.Core;
 using MonoDevelop.Ide;
 
+// oe REVERTED from MD-8.3.
+
 namespace MonoDevelop.Xml.Formatting
 {
 	class XmlFormattingPolicyPanelWidget : VBox
@@ -59,7 +61,7 @@ namespace MonoDevelop.Xml.Formatting
 		Button buttonRemove;
 		Label labelScopes;
 		Table tableScopes;
-		DesignerSupport.PropertyGridWrapper propertyGrid;
+		MonoDevelop.Components.PropertyGrid.PropertyGrid propertyGrid;
 		Button buttonAdvanced;
 
 		void Build ()
@@ -85,7 +87,7 @@ namespace MonoDevelop.Xml.Formatting
 				ColumnSpacing = 6
 			};
 
-			propertyGrid = new DesignerSupport.PropertyGridWrapper {
+			propertyGrid = new MonoDevelop.Components.PropertyGrid.PropertyGrid {
 				ShowToolbar = false,
 				ShowHelp = false
 			};
@@ -107,7 +109,7 @@ namespace MonoDevelop.Xml.Formatting
 			var rightVBox = new VBox (false, 6);
 			rightVBox.PackStart (labelScopes, false, false, 0);
 			rightVBox.PackStart (tableScopes, false, false, 0);
-			rightVBox.PackStart (propertyGrid.Widget, true, true, 0);
+			rightVBox.PackStart (propertyGrid, true, true, 0);
 
 			var mainBox = new HBox (false, 6);
 			mainBox.PackStart (boxScopes, false, false, 0);

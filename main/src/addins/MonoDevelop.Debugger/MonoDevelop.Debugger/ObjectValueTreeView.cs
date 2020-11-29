@@ -23,7 +23,6 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 //
-//
 
 using System;
 using System.Text;
@@ -40,7 +39,10 @@ using MonoDevelop.Ide.CodeCompletion;
 using MonoDevelop.Components.Commands;
 using MonoDevelop.Ide.Commands;
 using MonoDevelop.Ide.Editor.Extension;
+using System.Linq;
 using MonoDevelop.Ide.Fonts;
+
+// oe REVERTED from MD-8.3.
 
 namespace MonoDevelop.Debugger
 {
@@ -313,7 +315,6 @@ namespace MonoDevelop.Debugger
 			Model = store;
 			SearchColumn = -1; // disable the interactive search
 			RulesHint = true;
-			HeadersVisible = true;
 			EnableSearch = false;
 			AllowPopupMenu = true;
 			Selection.Mode = Gtk.SelectionMode.Multiple;
@@ -627,7 +628,7 @@ namespace MonoDevelop.Debugger
 		{
 			if (!Visible || Allocation.Width <= 0 || columnSizesUpdating || compact)
 				return;
-
+			
 			columnSizesUpdating = true;
 			
 			double width = (double) Allocation.Width;
@@ -684,12 +685,12 @@ namespace MonoDevelop.Debugger
 			}
 		}
 				
-		void SaveState ()
+		public void SaveState ()
 		{
 			state.Save ();
 		}
 		
-		void LoadState ()
+		public void LoadState ()
 		{
 			restoringState = true;
 			state.Load ();
@@ -758,8 +759,9 @@ namespace MonoDevelop.Debugger
 			}
 		}
 		
-		public PinnedWatchLocation PinnedWatchLocation { get; set; }
-
+		public string PinnedWatchFile { get; set; }
+		public int PinnedWatchLine { get; set; }
+		
 		public bool CompactView {
 			get {
 				return compact; 
@@ -2283,11 +2285,13 @@ namespace MonoDevelop.Debugger
 
 			if (PinnedWatch != null) {
 				CollapseAll ();
-				watch.Location = PinnedWatch.Location;
+				watch.File = PinnedWatch.File;
+				watch.Line = PinnedWatch.Line;
 				watch.OffsetX = PinnedWatch.OffsetX;
 				watch.OffsetY = PinnedWatch.OffsetY + SizeRequest ().Height + 5;
 			} else {
-				watch.Location = PinnedWatchLocation;
+				watch.File = PinnedWatchFile;
+				watch.Line = PinnedWatchLine;
 				watch.OffsetX = -1; // means that the watch should be placed at the line coordinates defined by watch.Line
 				watch.OffsetY = -1;
 			}

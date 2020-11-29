@@ -3135,7 +3135,7 @@
     <Compile Include="MonoDevelop.Ide.TypeSystem\IDynamicDocumentInfoProvider.cs" />
     <Compile Include="MonoDevelop.Ide.TypeSystem\MiscellaneousFilesWorkspace.cs" />
     <Compile Include="MonoDevelop.Ide\MimeTypeCatalog.cs" />
-    <Compile Include="MonoDevelop.Ide.Editor\ITextEditorInitializationService.cs" />
+    <Compile Include="MonoDevelop.Ide.Editor\ITextEditorFactoryService.cs" />
     <Compile Include="MonoDevelop.Ide.Gui\DisplayBindingService.cs" />
     <Compile Include="MonoDevelop.Ide.Gui\BackgroundProgressMonitor.cs" />
     <Compile Include="MonoDevelop.Ide.Gui\StatusProgressMonitor.cs" />

@@ -26,114 +26,49 @@
 //
 
 using System;
+using System.Collections.Generic;
 
 using Gtk;
-
-using Mono.Debugging.Client;
-
-using MonoDevelop.Core;
 using MonoDevelop.Ide.Gui;
+using Mono.Debugging.Client;
 using MonoDevelop.Components;
-using Foundation;
+
+// oe REVERTED from MD-8.3.
 
 namespace MonoDevelop.Debugger
 {
 	public class ObjectValuePad : PadContent
 	{
-		protected readonly bool UseNewTreeView = PropertyService.Get ("MonoDevelop.Debugger.UseNewTreeView", true);
-
-		protected ObjectValueTreeViewController controller;
 		protected ObjectValueTreeView tree;
-		// this is for the new treeview
-		protected MacObjectValueTreeView _treeview;
-
-		readonly Control control;
-		PadFontChanger fontChanger;
-		StackFrame lastFrame;
+		readonly ScrolledWindow scrolled;
 		bool needsUpdateValues;
 		bool needsUpdateFrame;
-		bool disposed;
+		bool initialResume;
+		StackFrame lastFrame;
+		PadFontChanger fontChanger;
 
 		public override Control Control {
-			get { return control; }
-		}
-
-		protected bool IsInitialResume {
-			get; private set;
-		}
-
-		public ObjectValuePad (bool allowWatchExpressions = false)
-		{
-			if (UseNewTreeView) {
-				controller = new ObjectValueTreeViewController (allowWatchExpressions);
-				controller.AllowEditing = true;
-
-				if (Platform.IsMac) {
-					LoggingService.LogInfo ("Using MacObjectValueTreeView for {0}", allowWatchExpressions ? "Watch Pad" : "Locals Pad");
-					var treeView = controller.GetMacControl (ObjectValueTreeViewFlags.ObjectValuePadFlags);
-					_treeview = treeView;
-
-					fontChanger = new PadFontChanger (treeView, treeView.SetCustomFont, treeView.QueueResize);
-
-					var scrolled = new AppKit.NSScrollView {
-						DocumentView = treeView,
-						AutohidesScrollers = false,
-						HasVerticalScroller = true,
-						HasHorizontalScroller = true,
-					};
-
-					// disable implicit animations
-					scrolled.WantsLayer = true;
-					scrolled.Layer.Actions = new NSDictionary (
-						"actions", NSNull.Null,
-						"contents", NSNull.Null,
-						"hidden", NSNull.Null,
-						"onLayout", NSNull.Null,
-						"onOrderIn", NSNull.Null,
-						"onOrderOut", NSNull.Null,
-						"position", NSNull.Null,
-						"sublayers", NSNull.Null,
-						"transform", NSNull.Null,
-						"bounds", NSNull.Null);
-
-					var host = new GtkNSViewHost (scrolled);
-					host.ShowAll ();
-
-					control = host;
-				} else {
-					LoggingService.LogInfo ("Using GtkObjectValueTreeView for {0}", allowWatchExpressions ? "Watch Pad" : "Locals Pad");
-					var treeView = controller.GetGtkControl (ObjectValueTreeViewFlags.ObjectValuePadFlags);
-					treeView.Show ();
-
-					fontChanger = new PadFontChanger (treeView, treeView.SetCustomFont, treeView.QueueResize);
-
-					var scrolled = new ScrolledWindow {
-						HscrollbarPolicy = PolicyType.Automatic,
-						VscrollbarPolicy = PolicyType.Automatic
-					};
-					scrolled.Add (treeView);
-					scrolled.Show ();
-
-					control = scrolled;
-				}
-			} else {
-				LoggingService.LogInfo ("Using old ObjectValueTreeView for {0}", allowWatchExpressions ? "Watch Pad" : "Locals Pad");
-				tree = new ObjectValueTreeView ();
-				tree.AllowAdding = allowWatchExpressions;
-				tree.AllowEditing = true;
-				tree.Show ();
-
-				fontChanger = new PadFontChanger (tree, tree.SetCustomFont, tree.QueueResize);
-
-				var scrolled = new ScrolledWindow {
-					HscrollbarPolicy = PolicyType.Automatic,
-					VscrollbarPolicy = PolicyType.Automatic
-				};
-				scrolled.Add (tree);
-				scrolled.Show ();
-
-				control = scrolled;
+			get {
+				return scrolled;
 			}
+		}
+
+		public ObjectValuePad ()
+		{
+			scrolled = new ScrolledWindow ();
+			scrolled.HscrollbarPolicy = PolicyType.Automatic;
+			scrolled.VscrollbarPolicy = PolicyType.Automatic;
+
+			tree = new ObjectValueTreeView ();
+
+			fontChanger = new PadFontChanger (tree, tree.SetCustomFont, tree.QueueResize);
+
+			tree.AllowEditing = true;
+			tree.AllowAdding = false;
+			tree.HeadersVisible = true;
+			tree.RulesHint = true;
+			scrolled.Add (tree);
+			scrolled.ShowAll ();
 
 			DebuggingService.CurrentFrameChanged += OnFrameChanged;
 			DebuggingService.PausedEvent += OnDebuggerPaused;
@@ -146,34 +81,28 @@ namespace MonoDevelop.Debugger
 			needsUpdateFrame = true;
 
 			//If pad is created/opened while debugging...
-			IsInitialResume = !DebuggingService.IsDebugging;
+			initialResume = !DebuggingService.IsDebugging;
 		}
 
 		public override void Dispose ()
 		{
-			if (disposed)
+			if (fontChanger == null)
 				return;
 
-			if (fontChanger != null) {
-				fontChanger.Dispose ();
-				fontChanger = null;
-			}
-
-			disposed = true;
-
+			fontChanger.Dispose ();
+			fontChanger = null;
 			DebuggingService.CurrentFrameChanged -= OnFrameChanged;
 			DebuggingService.PausedEvent -= OnDebuggerPaused;
 			DebuggingService.ResumedEvent -= OnDebuggerResumed;
 			DebuggingService.StoppedEvent -= OnDebuggerStopped;
 			DebuggingService.EvaluationOptionsChanged -= OnEvaluationOptionsChanged;
 			DebuggingService.VariableChanged -= OnVariableChanged;
-
 			base.Dispose ();
 		}
 
-		protected override void Initialize (IPadWindow window)
+		protected override void Initialize (IPadWindow container)
 		{
-			window.PadContentShown += delegate {
+			container.PadContentShown += delegate {
 				if (needsUpdateFrame)
 					OnUpdateFrame ();
 				else if (needsUpdateValues)
@@ -186,14 +115,8 @@ namespace MonoDevelop.Debugger
 			needsUpdateValues = false;
 			needsUpdateFrame = false;
 
-			if (DebuggingService.CurrentFrame != lastFrame) {
-				if (UseNewTreeView) {
-					controller.SetStackFrame (DebuggingService.CurrentFrame);
-				} else {
-					tree.Frame = DebuggingService.CurrentFrame;
-				}
-			}
-
+			if (DebuggingService.CurrentFrame != lastFrame)
+				tree.Frame = DebuggingService.CurrentFrame;
 			lastFrame = DebuggingService.CurrentFrame;
 		}
 
@@ -227,38 +150,21 @@ namespace MonoDevelop.Debugger
 
 		protected virtual void OnDebuggerResumed (object s, EventArgs a)
 		{
-			if (UseNewTreeView) {
-				if (!IsInitialResume) {
-					controller.ChangeCheckpoint ();
-				}
+			if (!initialResume)
+				tree.ChangeCheckpoint ();
 
-				controller.ClearValues ();
-			} else {
-				if (!IsInitialResume) {
-					tree.ChangeCheckpoint ();
-				}
-
-				tree.ClearValues ();
-			}
-
-			IsInitialResume = false;
+			tree.ClearValues ();
+			initialResume = false;
 		}
 
 		protected virtual void OnDebuggerStopped (object s, EventArgs a)
 		{
 			if (DebuggingService.IsDebugging)
 				return;
-
-			if (UseNewTreeView) {
-				controller.ResetChangeTracking ();
-				controller.ClearAll ();
-			} else {
-				tree.ResetChangeTracking ();
-				tree.ClearAll ();
-			}
-
+			tree.ResetChangeTracking ();
+			tree.ClearAll ();
 			lastFrame = null;
-			IsInitialResume = true;
+			initialResume = true;
 		}
 
 		protected virtual void OnEvaluationOptionsChanged (object s, EventArgs a)

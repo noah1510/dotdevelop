@@ -30,19 +30,15 @@ using MonoDevelop.Debugger;
 using Mono.Debugging.Client;
 using Gtk;
 
+// oe REVERTED from MD-8.3.
+
 namespace MonoDevelop.SourceEditor
 {
 	class PinnedWatchWidget : EventBox
 	{
-		static bool UseNewTreeView = true;
-
-		readonly ObjectValueTreeViewController controller;
-		readonly TreeView treeView;
-
 		readonly ObjectValueTreeView valueTree;
-
-		ObjectValue objectValue;
 		ScrolledWindow sw;
+		ObjectValue objectValue;
 
 		MonoTextEditor Editor {
 			get; set;
@@ -60,19 +56,12 @@ namespace MonoDevelop.SourceEditor
 				if (objectValue == value)
 					return;
 
-				if (UseNewTreeView) {
-					controller.ClearAll ();
-
-					if (value != null)
-						controller.AddValue (value);
+				if (objectValue != null && value != null) {
+					valueTree.ReplaceValue (objectValue, value);
 				} else {
-					if (objectValue != null && value != null) {
-						valueTree.ReplaceValue (objectValue, value);
-					} else {
-						valueTree.ClearValues ();
-						if (value != null)
-							valueTree.AddValue (value);
-					}
+					valueTree.ClearValues ();
+					if (value != null)
+						valueTree.AddValue (value);
 				}
 
 				objectValue = value;
@@ -85,43 +74,27 @@ namespace MonoDevelop.SourceEditor
 			Editor = editor;
 			Watch = watch;
 
-			if (UseNewTreeView) {
-				controller = new ObjectValueTreeViewController ();
-				controller.AllowEditing = true;
-
-				treeView = (TreeView) controller.GetGtkControl (ObjectValueTreeViewFlags.PinnedWatchFlags);
-
-				controller.PinnedWatch = watch;
-				valueTree = null;
-
-				if (objectValue != null)
-					controller.AddValue (objectValue);
-			} else {
-				valueTree = new ObjectValueTreeView ();
-				valueTree.AllowAdding = false;
-				valueTree.AllowEditing = true;
-				valueTree.AllowPinning = true;
-				valueTree.HeadersVisible = false;
-				valueTree.CompactView = true;
-				valueTree.PinnedWatch = watch;
-				if (objectValue != null)
-					valueTree.AddValue (objectValue);
-
-				treeView = valueTree;
-				controller = null;
-			}
+			valueTree = new ObjectValueTreeView ();
+			valueTree.AllowAdding = false;
+			valueTree.AllowEditing = true;
+			valueTree.AllowPinning = true;
+			valueTree.HeadersVisible = false;
+			valueTree.CompactView = true;
+			valueTree.PinnedWatch = watch;
+			if (objectValue != null)
+				valueTree.AddValue (objectValue);
 			
-			treeView.ButtonPressEvent += HandleValueTreeButtonPressEvent;
-			treeView.ButtonReleaseEvent += HandleValueTreeButtonReleaseEvent;
-			treeView.MotionNotifyEvent += HandleValueTreeMotionNotifyEvent;
-			treeView.SizeAllocated += OnTreeSizeChanged;
+			valueTree.ButtonPressEvent += HandleValueTreeButtonPressEvent;
+			valueTree.ButtonReleaseEvent += HandleValueTreeButtonReleaseEvent;
+			valueTree.MotionNotifyEvent += HandleValueTreeMotionNotifyEvent;
+			valueTree.SizeAllocated += OnTreeSizeChanged;
 
 			sw = new ScrolledWindow ();
 			sw.HscrollbarPolicy = PolicyType.Never;
 			sw.VscrollbarPolicy = PolicyType.Never;
-			sw.Add (treeView);
+			sw.Add (valueTree);
 
-			var fr = new Frame ();
+			Frame fr = new Frame ();
 			fr.ShadowType = ShadowType.Out;
 			fr.Add (sw);
 			Add (fr);
@@ -135,7 +108,7 @@ namespace MonoDevelop.SourceEditor
 		void OnTreeSizeChanged (object s, SizeAllocatedArgs a)
 		{
 			const int maxHeight = 240;
-			var treeHeight = treeView.SizeRequest ().Height;
+			var treeHeight = valueTree.SizeRequest ().Height;
 			if (treeHeight > maxHeight && sw.VscrollbarPolicy == PolicyType.Never) {
 				sw.VscrollbarPolicy = PolicyType.Always;
 				sw.HeightRequest = maxHeight;
@@ -149,26 +122,15 @@ namespace MonoDevelop.SourceEditor
 
 		void HandleDebuggingServiceResumedEvent (object sender, EventArgs e)
 		{
-			if (UseNewTreeView) {
-				controller.ChangeCheckpoint ();
-				controller.AllowExpanding = false;
-				controller.AllowEditing = false;
-			} else {
-				valueTree.ChangeCheckpoint ();
-				valueTree.AllowEditing = false;
-				valueTree.AllowExpanding = false;
-			}
+			valueTree.ChangeCheckpoint ();
+			valueTree.AllowEditing = false;
+			valueTree.AllowExpanding = false;
 		}
 
 		void HandleDebuggingServicePausedEvent (object sender, EventArgs e)
 		{
-			if (UseNewTreeView) {
-				controller.AllowExpanding = true;
-				controller.AllowEditing = true;
-			} else {
-				valueTree.AllowExpanding = true;
-				valueTree.AllowEditing = true;
-			}
+			valueTree.AllowExpanding = true;
+			valueTree.AllowEditing = true;
 		}
 		
 		protected override void OnDestroyed ()
@@ -177,10 +139,10 @@ namespace MonoDevelop.SourceEditor
 			DebuggingService.PausedEvent -= HandleDebuggingServicePausedEvent;
 			DebuggingService.ResumedEvent -= HandleDebuggingServiceResumedEvent;
 
-			treeView.ButtonPressEvent -= HandleValueTreeButtonPressEvent;
-			treeView.ButtonReleaseEvent -= HandleValueTreeButtonReleaseEvent;
-			treeView.MotionNotifyEvent -= HandleValueTreeMotionNotifyEvent;
-			treeView.SizeAllocated -= OnTreeSizeChanged;
+			valueTree.ButtonPressEvent -= HandleValueTreeButtonPressEvent;
+			valueTree.ButtonReleaseEvent -= HandleValueTreeButtonReleaseEvent;
+			valueTree.MotionNotifyEvent -= HandleValueTreeMotionNotifyEvent;
+			valueTree.SizeAllocated -= OnTreeSizeChanged;
 		}
 
 
@@ -197,9 +159,9 @@ namespace MonoDevelop.SourceEditor
 			TreePath path;
 			TreeViewColumn col;
 			int cx, cy;
-			treeView.GetPathAtPos ((int)args.Event.X, (int)args.Event.Y, out path, out col, out cx, out cy);
+			valueTree.GetPathAtPos ((int)args.Event.X, (int)args.Event.Y, out path, out col, out cx, out cy);
 			//Gdk.Rectangle rect = valueTree.GetCellArea (path, col);
-			if (!mousePressed && treeView.Columns[0] == col) {
+			if (!mousePressed && valueTree.Columns[0] == col) {
 				mousePressed = true;
 				Editor.TextArea.MoveToTop (this);
 			}

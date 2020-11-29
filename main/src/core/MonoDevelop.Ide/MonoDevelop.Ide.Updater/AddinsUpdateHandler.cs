@@ -98,37 +98,38 @@ namespace MonoDevelop.Ide.Updater
 		{
 			if (args.Button == Xwt.PointerButton.Left) {
 				HideAlert ();
-				OpenAddinManagerWindow ();
+			//oe	OpenAddinManagerWindow ();
+				AddinManagerWindow.Run (IdeApp.Workbench.RootWindow.Visible ? IdeApp.Workbench.RootWindow : null);
 			}
 		}
 
-		static void OpenAddinManagerWindow ()
-		{
-			if (!IdeApp.Workbench.RootWindow.Visible && WelcomePage.WelcomePageService.WelcomeWindow.nativeWidget is AppKit.NSWindow parentNsWindow) {
-				var dlg = AddinManagerWindow.Create ();
-
-				EventHandler shownEvent = null;
-				shownEvent = (s, e) => {
-					dlg.Shown -= shownEvent;
-					try {
-						var nativeWindow = Components.Mac.GtkMacInterop.GetNSWindow (dlg);
-						MessageService.CenterWindow (nativeWindow, parentNsWindow);
-						parentNsWindow.AddChildWindow (nativeWindow, AppKit.NSWindowOrderingMode.Above);
-					} catch (Exception ex) {
-						LoggingService.LogInternalError (ex);
-					}
-				};
-
-				dlg.Shown += shownEvent;
-				try {
-					dlg.Run ();
-				} finally {
-					dlg.Destroy ();
-				}
-			} else {
-				AddinManagerWindow.Run (IdeApp.Workbench.RootWindow);
-			}
-		}
+	//oe	static void OpenAddinManagerWindow ()
+	//oe	{
+	//oe		if (!IdeApp.Workbench.RootWindow.Visible && WelcomePage.WelcomePageService.WelcomeWindow.nativeWidget is AppKit.NSWindow parentNsWindow) {
+	//oe			var dlg = AddinManagerWindow.Create ();
+	//oe
+	//oe			EventHandler shownEvent = null;
+	//oe			shownEvent = (s, e) => {
+	//oe				dlg.Shown -= shownEvent;
+	//oe				try {
+	//oe					var nativeWindow = Components.Mac.GtkMacInterop.GetNSWindow (dlg);
+	//oe					MessageService.CenterWindow (nativeWindow, parentNsWindow);
+	//oe					parentNsWindow.AddChildWindow (nativeWindow, AppKit.NSWindowOrderingMode.Above);
+	//oe				} catch (Exception ex) {
+	//oe					LoggingService.LogInternalError (ex);
+	//oe				}
+	//oe			};
+	//oe
+	//oe			dlg.Shown += shownEvent;
+	//oe			try {
+	//oe				dlg.Run ();
+	//oe			} finally {
+	//oe				dlg.Destroy ();
+	//oe			}
+	//oe		} else {
+	//oe			AddinManagerWindow.Run (IdeApp.Workbench.RootWindow);
+	//oe		}
+	//oe	}
 
 		public async static void ShowManager ()
 		{
@@ -140,7 +141,8 @@ namespace MonoDevelop.Ide.Updater
 				await t;
 			}
 			HideAlert ();
-			OpenAddinManagerWindow ();
+		//oe	OpenAddinManagerWindow ();
+			AddinManagerWindow.Run (IdeApp.Workbench.RootWindow.Visible ? IdeApp.Workbench.RootWindow : null);
 		}
 
 		public static void HideAlert ()

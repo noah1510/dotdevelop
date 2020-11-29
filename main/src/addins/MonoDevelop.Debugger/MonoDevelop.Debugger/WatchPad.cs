@@ -33,29 +33,24 @@ using System.Collections.Generic;
 using MonoDevelop.Core;
 using MonoDevelop.Ide.Gui;
 
+// oe REVERTED from MD-8.3.
+
 namespace MonoDevelop.Debugger
 {
 	public class WatchPad : ObjectValuePad, IMementoCapable, ICustomXmlSerializer
 	{
-		// Note: This can be removed once we make the switch to UseNewTreeView
 		static readonly Gtk.TargetEntry[] DropTargets = {
 			new Gtk.TargetEntry ("text/plain;charset=utf-8", Gtk.TargetFlags.App, 0)
 		};
-		readonly List<string> expressions = new List<string> ();
-
-		public WatchPad () : base (true)
+		List<string> storedVars;
+		
+		public WatchPad ()
 		{
-			if (UseNewTreeView) {
-				controller.ExpressionAdded += OnExpressionAdded;
-				controller.ExpressionChanged += OnExpressionChanged;
-				controller.ExpressionRemoved += OnExpressionRemoved;
-			} else {
-				tree.EnableModelDragDest (DropTargets, Gdk.DragAction.Copy);
-				tree.DragDataReceived += HandleDragDataReceived;
-			}
+			tree.EnableModelDragDest (DropTargets, Gdk.DragAction.Copy);
+			tree.DragDataReceived += HandleDragDataReceived;
+			tree.AllowAdding = true;
 		}
 
-		// Note: This can be removed once we make the switch to UseNewTreeView
 		void HandleDragDataReceived (object o, Gtk.DragDataReceivedArgs args)
 		{
 			var text = args.SelectionData.Text;
@@ -72,96 +67,16 @@ namespace MonoDevelop.Debugger
 				AddWatch (expr.Trim ());
 			}
 		}
-
+		
 		public void AddWatch (string expression)
 		{
-			//LoggingService.LogInfo ("Adding expression '{0}'", expression);
-
-			if (UseNewTreeView) {
-				controller.AddExpression (expression);
-			} else {
-				tree.AddExpression (expression);
-			}
-		}
-
-		void RestoreExpressions ()
-		{
-			controller.ExpressionAdded -= OnExpressionAdded;
-
-			try {
-				_treeview.BeginUpdates ();
-				try {
-					// remove the expressions because we're going to rebuild them
-					controller.ClearAll ();
-
-					// re-add the expressions which will reevaluate the expressions and repopulate the treeview
-					controller.AddExpressions (expressions);
-				} finally {
-					_treeview.EndUpdates ();
-				}
-			} finally {
-				controller.ExpressionAdded += OnExpressionAdded;
-			}
-		}
-
-		public override void OnUpdateFrame ()
-		{
-			base.OnUpdateFrame ();
-
-			if (UseNewTreeView)
-				RestoreExpressions ();
+			tree.AddExpression (expression);
 		}
 
 		public override void OnUpdateValues ()
 		{
 			base.OnUpdateValues ();
-
-			if (UseNewTreeView) {
-				controller.ReEvaluateExpressions ();
-			} else {
-				tree.Update ();
-			}
-		}
-
-		void OnExpressionAdded (object sender, ExpressionAddedEventArgs e)
-		{
-			//LoggingService.LogInfo ("Expression added: '{0}'", e.Expression);
-			expressions.Add (e.Expression);
-		}
-
-		void OnExpressionChanged (object sender, ExpressionChangedEventArgs e)
-		{
-			//LoggingService.LogInfo ("Expression changed @ index {0}: '{1}' -> '{2}'", e.Index, e.OldExpression, e.NewExpression);
-
-			if (e.Index != -1) {
-				expressions[e.Index] = e.NewExpression;
-			} else {
-				//LoggingService.LogWarning ("Failed to find old expression: '{0}'", e.OldExpression);
-				expressions.Add (e.NewExpression);
-			}
-		}
-
-		void OnExpressionRemoved (object sender, ExpressionRemovedEventArgs e)
-		{
-			//LoggingService.LogInfo ("Expression removed @ index {0}: '{1}'", e.Index, e.Expression);
-			if (e.Index < 0 || e.Index >= expressions.Count) {
-				//LoggingService.LogWarning ("Failed to remove expression: '{0}'", e.Expression);
-				return;
-			}
-			expressions.RemoveAt (e.Index);
-		}
-
-		public override void Dispose ()
-		{
-			if (UseNewTreeView) {
-				controller.ExpressionAdded -= OnExpressionAdded;
-				controller.ExpressionChanged -= OnExpressionChanged;
-				controller.ExpressionRemoved -= OnExpressionRemoved;
-			} else {
-				tree.DragDataReceived -= HandleDragDataReceived;
-			}
-
-			base.Dispose ();
+			tree.Update ();
 		}
 
 		#region IMementoCapable implementation 
@@ -171,40 +86,27 @@ namespace MonoDevelop.Debugger
 				return this;
 			}
 			set {
-				if (UseNewTreeView) {
-					if (controller != null)
-						RestoreExpressions ();
-				} else {
-					if (tree != null) {
-						tree.ClearExpressions ();
-						tree.AddExpressions (expressions);
-					}
+				if (tree != null) {
+					tree.ClearExpressions ();
+					if (storedVars != null)
+						tree.AddExpressions (storedVars);
 				}
 			}
 		}
 		
 		void ICustomXmlSerializer.WriteTo (XmlWriter writer)
 		{
-			if (UseNewTreeView) {
-				if (controller != null) {
-					writer.WriteStartElement ("Values");
-					foreach (var expression in expressions)
-						writer.WriteElementString ("Value", expression);
-					writer.WriteEndElement ();
-				}
-			} else {
-				if (tree != null) {
-					writer.WriteStartElement ("Values");
-					foreach (var name in tree.Expressions)
-						writer.WriteElementString ("Value", name);
-					writer.WriteEndElement ();
-				}
+			if (tree != null) {
+				writer.WriteStartElement ("Values");
+				foreach (string name in tree.Expressions)
+					writer.WriteElementString ("Value", name);
+				writer.WriteEndElement ();
 			}
 		}
 		
 		ICustomXmlSerializer ICustomXmlSerializer.ReadFrom (XmlReader reader)
 		{
-			expressions.Clear ();
+			storedVars = new List<string> ();
 			
 			reader.MoveToContent ();
 			if (reader.IsEmptyElement) {
@@ -215,10 +117,9 @@ namespace MonoDevelop.Debugger
 			reader.MoveToContent ();
 			while (reader.NodeType != XmlNodeType.EndElement) {
 				if (reader.NodeType == XmlNodeType.Element) {
-					expressions.Add (reader.ReadElementString ());
-				} else {
+					storedVars.Add (reader.ReadElementString ());
+				} else
 					reader.Skip ();
-				}
 			}
 			reader.ReadEndElement ();
 			return null;

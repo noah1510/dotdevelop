@@ -27,7 +27,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using MonoDevelop.Components.AtkCocoaHelper;
 using MonoDevelop.Core;
 using MonoDevelop.Ide;
 using MonoDevelop.Projects;
@@ -36,6 +35,8 @@ using Xwt;
 using Xwt.Drawing;
 using PropertyChangedEventArgs = System.ComponentModel.PropertyChangedEventArgs;
 
+// oe REVERTED from MD-8.3.
+
 namespace MonoDevelop.PackageManagement
 {
 	internal partial class ManagePackagesDialog
@@ -43,14 +44,13 @@ namespace MonoDevelop.PackageManagement
 		IBackgroundPackageActionRunner backgroundActionRunner;
 		ManagePackagesViewModel viewModel;
 		List<SourceRepositoryViewModel> packageSources;
+		DataField<bool> packageHasBackgroundColorField = new DataField<bool> ();
 		DataField<ManagePackagesSearchResultViewModel> packageViewModelField = new DataField<ManagePackagesSearchResultViewModel> ();
 		DataField<Image> packageImageField = new DataField<Image> ();
-		DataField<bool> packageCheckBoxField = new DataField<bool> ();
-		DataField<string> packageCheckA11yField = new DataField<string> ();
-		DataField<string> packageDescriptionA11yField = new DataField<string> ();
+		DataField<double> packageCheckBoxAlphaField = new DataField<double> ();
+		const double packageCheckBoxSemiTransarentAlpha = 0.6;
 		ListStore packageStore;
 		ManagePackagesCellView packageCellView;
-		CheckBoxCellView packageCheckView;
 		TimeSpan searchDelayTimeSpan = TimeSpan.FromMilliseconds (500);
 		IDisposable searchTimer;
 		SourceRepositoryViewModel dummyPackageSourceRepresentingConfigureSettingsItem =
@@ -91,6 +91,7 @@ namespace MonoDevelop.PackageManagement
 			consolidateLabel.Visible = viewModel.IsManagingSolution;
 			UpdateDialogTitle ();
 			UpdatePackageSearchEntryWithInitialText (initialSearch);
+			UpdatePackageResultsPageLabels ();
 
 			InitializeListView ();
 			UpdateAddPackagesButton ();
@@ -98,48 +99,18 @@ namespace MonoDevelop.PackageManagement
 			LoadViewModel (initialSearch);
 
 			closeButton.Clicked += CloseButtonClicked;
-			showPrereleaseCheckBox.Clicked += ShowPrereleaseCheckBoxClicked;
-			packageSourceComboBox.SelectionChanged += PackageSourceChanged;
-			addPackagesButton.Clicked += AddPackagesButtonClicked;
-			packageSearchEntry.Changed += PackageSearchEntryChanged;
-			packageVersionComboBox.SelectionChanged += PackageVersionChanged;
+			this.showPrereleaseCheckBox.Clicked += ShowPrereleaseCheckBoxClicked;
+			this.packageSourceComboBox.SelectionChanged += PackageSourceChanged;
+			this.addPackagesButton.Clicked += AddPackagesButtonClicked;
+			this.packageSearchEntry.Changed += PackageSearchEntryChanged;
+			this.packageSearchEntry.Activated += PackageSearchEntryActivated;
+			this.packageVersionComboBox.SelectionChanged += PackageVersionChanged;
 			imageLoader.Loaded += ImageLoaded;
 
 			browseLabel.ButtonPressed += BrowseLabelButtonPressed;
-			browseLabel.KeyPressed += BrowseLabelKeyPressed;
 			installedLabel.ButtonPressed += InstalledLabelButtonPressed;
-			installedLabel.KeyPressed += InstalledLabelKeyPressed;
 			updatesLabel.ButtonPressed += UpdatesLabelButtonPressed;
-			updatesLabel.KeyPressed += UpdatesLabelKeyPressed;
 			consolidateLabel.ButtonPressed += ConsolidateLabelButtonPressed;
-			consolidateLabel.KeyPressed += ConsolidateLabelKeyPressed;
-			UpdateTabAccessibility ();
-			UpdatePackageResultsPageLabels ();
-		}
-
-		void UpdateTabAccessibility ()
-		{
-			if (tabGroup.Surface.ToolkitEngine.Type == ToolkitType.Gtk) {
-				if (consolidateLabel.Parent.Surface.NativeWidget is Gtk.Container a11yGroup) {
-					a11yGroup.Accessible.SetRole (AtkCocoa.Roles.AXTabGroup);
-					var children = a11yGroup.Children;
-					var tabs = new List<Atk.Object> (children.Length);
-					foreach (var child in children) {
-						if (!child.Visible)
-							continue;
-						if (child is Gtk.EventBox box && box.Child is Gtk.Label) {
-							box.Accessible.SetTitleUIElement (box.Child.Accessible);
-							box.Child.Accessible.SetShouldIgnore (true);
-						}
-						var tab = child.Accessible;
-						tab.SetRole (AtkCocoa.Roles.AXRadioButton);
-						tab.SetSubRole (AtkCocoa.SubRoles.AXTabButton);
-						tab.SetValue (false);
-						tabs.Add (tab);
-					}
-					a11yGroup.Accessible.SetTabs (tabs.ToArray ());
-				}
-			}
 		}
 
 		public bool ShowPreferencesForPackageSources { get; private set; }
@@ -148,21 +119,6 @@ namespace MonoDevelop.PackageManagement
 		{
 			closeButton.Clicked -= CloseButtonClicked;
 			currentPackageVersionLabel.BoundsChanged -= PackageVersionLabelBoundsChanged;
-
-			showPrereleaseCheckBox.Clicked -= ShowPrereleaseCheckBoxClicked;
-			packageSourceComboBox.SelectionChanged -= PackageSourceChanged;
-			addPackagesButton.Clicked -= AddPackagesButtonClicked;
-			packageSearchEntry.Changed -= PackageSearchEntryChanged;
-			packageVersionComboBox.SelectionChanged -= PackageVersionChanged;
-
-			browseLabel.ButtonPressed -= BrowseLabelButtonPressed;
-			browseLabel.KeyPressed -= BrowseLabelKeyPressed;
-			installedLabel.ButtonPressed -= InstalledLabelButtonPressed;
-			installedLabel.KeyPressed -= InstalledLabelKeyPressed;
-			updatesLabel.ButtonPressed -= UpdatesLabelButtonPressed;
-			updatesLabel.KeyPressed -= UpdatesLabelKeyPressed;
-			consolidateLabel.ButtonPressed -= ConsolidateLabelButtonPressed;
-			consolidateLabel.KeyPressed -= ConsolidateLabelKeyPressed;
 
 			imageLoader.Loaded -= ImageLoaded;
 			imageLoader.Dispose ();
@@ -201,49 +157,29 @@ namespace MonoDevelop.PackageManagement
 
 		void InitializeListView ()
 		{
-			packageStore = new ListStore (packageImageField, packageViewModelField, packageCheckBoxField, packageCheckA11yField, packageDescriptionA11yField);
+			packageStore = new ListStore (packageHasBackgroundColorField, packageCheckBoxAlphaField, packageImageField, packageViewModelField);
 			packagesListView.DataSource = packageStore;
 
-			AddCellViewsToListView ();
-						
+			AddPackageCellViewToListView ();
+
 			packagesListView.SelectionChanged += PackagesListViewSelectionChanged;
 			packagesListView.RowActivated += PackagesListRowActivated;
 			packagesListView.VerticalScrollControl.ValueChanged += PackagesListViewScrollValueChanged;
-
-			if (Toolkit.CurrentEngine.Type == ToolkitType.Gtk) {
-				// TODO: unlike Xwt.TreeView, Xwt.ListView has no UseAlternatingRowColors property
-				var gtkTreeView = packagesListView.Surface.NativeWidget as Gtk.Widget;
-				if (gtkTreeView is Gtk.ScrolledWindow scroll)
-					gtkTreeView = scroll.Child;
-				if (gtkTreeView is Gtk.TreeView tree)
-					tree.RulesHint = true;
-			}
 		}
 
-		void AddCellViewsToListView ()
+		void AddPackageCellViewToListView ()
 		{
-			var checkColumn = new ListViewColumn (GettextCatalog.GetString ("Add Package"));
-
-			packageCheckView = new CheckBoxCellView (packageCheckBoxField) { Editable = true };
-			packageCheckView.AccessibleFields.Label = packageCheckA11yField;
-			packageCheckView.Toggled += PackageCheckCellViewPackageChecked;
-
-			// HACK: Xwt has no custom cell padding, so we need to add an empty label for spacing
-			var spaceText = new AccessibleSpacerCellView ();
-			spaceText.AccessibleFields.Label = packageCheckA11yField;
-			checkColumn.Views.Add (spaceText);
-			checkColumn.Views.Add (packageCheckView);
-			packagesListView.Columns.Add (checkColumn);
-
 			packageCellView = new ManagePackagesCellView {
 				PackageField = packageViewModelField,
+				HasBackgroundColorField = packageHasBackgroundColorField,
+				CheckBoxAlphaField = packageCheckBoxAlphaField,
 				ImageField = packageImageField,
-				CellWidth = 446
+				CellWidth = 467
 			};
-			packageCellView.AccessibleFields.Label = packageDescriptionA11yField;
-
 			var textColumn = new ListViewColumn ("Package", packageCellView);
 			packagesListView.Columns.Add (textColumn);
+
+			packageCellView.PackageChecked += PackageCellViewPackageChecked;
 		}
 
 		void InitializeProjectsListView ()
@@ -267,7 +203,6 @@ namespace MonoDevelop.PackageManagement
 
 			projectsListView = new ListView ();
 			projectsListView.DataSource = projectStore;
-			projectsListView.Accessible.LabelWidget = projectsListViewLabel;
 
 			// Selected project check box column.
 			if (projectCheckBoxCellView != null)
@@ -276,15 +211,16 @@ namespace MonoDevelop.PackageManagement
 			projectCheckBoxCellView.ActiveField = projectCheckedField;
 			projectCheckBoxCellView.Editable = true;
 			projectCheckBoxCellView.Toggled += ProjectCheckBoxCellViewToggled;
-			var column = new ListViewColumn (GettextCatalog.GetString ("Project"), projectCheckBoxCellView) {
+			var column = new ListViewColumn (string.Empty, projectCheckBoxCellView);
+			projectsListView.Columns.Add (column);
+
+			// Project column.
+			var textCellView = new TextCellView ();
+			textCellView.TextField = projectNameField;
+			column = new ListViewColumn (GettextCatalog.GetString ("Project"), textCellView) {
 				CanResize = true,
 				SortDataField = projectNameField
 			};
-
-			// Project name.
-			var textCellView = new TextCellView ();
-			textCellView.TextField = projectNameField;
-			column.Views.Add (textCellView);
 			projectsListView.Columns.Add (column);
 
 			// Package version column
@@ -331,8 +267,6 @@ namespace MonoDevelop.PackageManagement
 			if (!String.IsNullOrWhiteSpace (packageSearchEntry.Text)) {
 				packagesListView.Visible = false;
 				noPackagesFoundFrame.Visible = true;
-
-				IdeApp.Workbench.RootWindow.Accessible.MakeAccessibilityAnnouncement (noPackagesFoundLabel.Text);
 			}
 		}
 
@@ -582,7 +516,6 @@ namespace MonoDevelop.PackageManagement
 				// Show spinner?
 			} else if (viewModel.IsReadingPackages) {
 				ClearPackages ();
-				IdeApp.Workbench.RootWindow.Accessible.MakeAccessibilityAnnouncement (loadingSpinnerLabel.Text);
 			} else {
 				HideLoadingMessage ();
 			}
@@ -598,6 +531,7 @@ namespace MonoDevelop.PackageManagement
 		{
 			packageStore.Clear ();
 			ResetPackagesListViewScroll ();
+			UpdatePackageListViewSelectionColor ();
 			ShowLoadingMessage ();
 			ShrinkImageCache ();
 			DisposePopulatePackageVersionsTimer ();
@@ -637,11 +571,6 @@ namespace MonoDevelop.PackageManagement
 
 			if (packagesListViewWasEmpty && (packageStore.RowCount > 0)) {
 				packagesListView.SelectRow (0);
-
-				string message = string.IsNullOrWhiteSpace (packageSearchEntry.Text)
-					? GettextCatalog.GetString ("Packages loaded")
-					: GettextCatalog.GetString ("Search completed");
-				IdeApp.Workbench.RootWindow.Accessible.MakeAccessibilityAnnouncement (message);
 			}
 
 			if (!viewModel.IsReadingPackages && (packageStore.RowCount == 0)) {
@@ -652,26 +581,9 @@ namespace MonoDevelop.PackageManagement
 		void AppendPackageToListView (ManagePackagesSearchResultViewModel packageViewModel)
 		{
 			int row = packageStore.AddRow ();
-			var accessibleDescription = StringBuilderCache.Allocate (packageViewModel.Id);
-			if (packageViewModel.HasDownloadCount) {
-				accessibleDescription.Append (", ");
-				if (packageViewModel.ShowVersionInsteadOfDownloadCount) {
-					accessibleDescription.Append (GettextCatalog.GetString ("Version"));
-					accessibleDescription.Append (" ");
-					accessibleDescription.Append (packageViewModel.GetDownloadCountOrVersionDisplayText ());
-				} else {
-					accessibleDescription.Append (packageViewModel.GetDownloadCountOrVersionDisplayText ());
-					accessibleDescription.Append (" ");
-					accessibleDescription.Append (GettextCatalog.GetString ("Downloads"));
-				}
-			}
-			if (!string.IsNullOrEmpty (packageViewModel.Summary))
-				accessibleDescription.Append (", ").Append (packageViewModel.Summary);
-			packageStore.SetValues (row,
-				packageViewModelField, packageViewModel,
-				packageCheckBoxField, packageViewModel.IsChecked,
-				packageCheckA11yField, packageViewModel.Name,
-				packageDescriptionA11yField, StringBuilderCache.ReturnAndFree (accessibleDescription));
+			packageStore.SetValue (row, packageHasBackgroundColorField, IsOddRow (row));
+			packageStore.SetValue (row, packageCheckBoxAlphaField, GetPackageCheckBoxAlpha ());
+			packageStore.SetValue (row, packageViewModelField, packageViewModel);
 		}
 
 		void LoadPackageImage (int row, ManagePackagesSearchResultViewModel packageViewModel)
@@ -684,6 +596,14 @@ namespace MonoDevelop.PackageManagement
 		static bool IsOddRow (int row)
 		{
 			return (row % 2) == 0;
+		}
+
+		double GetPackageCheckBoxAlpha ()
+		{
+			if (PackagesCheckedCount == 0) {
+				return packageCheckBoxSemiTransarentAlpha;
+			}
+			return 1;
 		}
 
 		void ImageLoaded (object sender, ImageLoadedEventArgs e)
@@ -747,17 +667,14 @@ namespace MonoDevelop.PackageManagement
 				GetPackagesCountForAddPackagesButtonLabel (),
 				viewModel.PageSelected);
 
-			return Toolkit.NativeEngine.Invoke (() => {
-				using (var dialog = new SelectProjectsDialog (selectProjectsViewModel)) {
-					Command result = dialog.Run (this);
-					if (result == Command.Ok) {
-						return dialog.GetSelectedProjects ();
-					} else {
-						return Enumerable.Empty<IDotNetProject> ();
-					}
+			using (var dialog = new SelectProjectsDialog (selectProjectsViewModel)) {
+				Command result = dialog.ShowWithParent ();
+				if (result == Command.Ok) {
+					return dialog.GetSelectedProjects ();
+				} else {
+					return Enumerable.Empty<IDotNetProject> ();
 				}
-			});
-
+			}
 		}
 
 		/// <summary>
@@ -843,16 +760,8 @@ namespace MonoDevelop.PackageManagement
 		{
 			int count = packageActions.Count;
 			if (count == 1) {
-				if (packageActions [0] is UpdateMultipleNuGetPackagesAction updateMultiplePackagesAction) {
-					count = updateMultiplePackagesAction.PackagesToUpdate.Count ();
-					if (count == 1) {
-						return ProgressMonitorStatusMessageFactory.CreateUpdatingSinglePackageMessage (
-							updateMultiplePackagesAction.PackagesToUpdate.First ().Id);
-					}
-				} else {
-					string packageId = packageActions.Cast<INuGetPackageAction> ().First ().PackageId;
-					return ProgressMonitorStatusMessageFactory.CreateUpdatingSinglePackageMessage (packageId);
-				}
+				string packageId = packageActions.Cast<INuGetPackageAction> ().First ().PackageId;
+				return ProgressMonitorStatusMessageFactory.CreateUpdatingSinglePackageMessage (packageId);
 			}
 
 			return new ProgressMonitorStatusMessage (
@@ -924,22 +833,56 @@ namespace MonoDevelop.PackageManagement
 			viewModel.SearchTerms = this.packageSearchEntry.Text;
 			viewModel.Search ();
 
-			IdeApp.Workbench.RootWindow.Accessible.MakeAccessibilityAnnouncement (loadingSpinnerLabel.Text);
-
 			return false;
-		}
-
-		void PackageCheckCellViewPackageChecked (object sender, WidgetEventArgs e)
-		{
-			PackagesListRowActivated (sender, new ListViewRowEventArgs (packagesListView.CurrentEventRow));
 		}
 
 		void PackagesListRowActivated (object sender, ListViewRowEventArgs e)
 		{
-			ManagePackagesSearchResultViewModel packageViewModel = packageStore.GetValue (e.RowIndex, packageViewModelField);
-			packageViewModel.IsChecked = !packageViewModel.IsChecked;
-			packageStore.SetValue (e.RowIndex, packageCheckBoxField, packageViewModel.IsChecked);
-			UpdateAddPackagesButton ();
+			if (PackagesCheckedCount > 0) {
+				AddPackagesButtonClicked (sender, e);
+			} else {
+				ManagePackagesSearchResultViewModel packageViewModel = packageStore.GetValue (e.RowIndex, packageViewModelField);
+				ManagePackage (packageViewModel);
+			}
+		}
+
+		void ManagePackage (ManagePackagesSearchResultViewModel packageViewModel)
+		{
+			try {
+				if (packageViewModel != null) {
+					if (viewModel.IsConsolidatePageSelected) {
+						List<IPackageAction> packageActions = viewModel.CreateConsolidatePackageActions (
+							new ManagePackagesSearchResultViewModel [] { packageViewModel }
+						);
+						RunPackageActions (packageActions);
+					} else {
+						var projects = SelectProjects (packageViewModel).ToList ();
+						if (!projects.Any ())
+							return;
+
+						List<IPackageAction> packageActions = viewModel.CreatePackageActions (
+							new ManagePackagesSearchResultViewModel [] { packageViewModel },
+							projects);
+						RunPackageActions (packageActions);
+					}
+				}
+			} catch (Exception ex) {
+				LoggingService.LogInternalError ("ManagePackage failed.", ex);
+				ShowErrorMessage (ex.Message);
+			}
+		}
+
+		void PackageSearchEntryActivated (object sender, EventArgs e)
+		{
+			if (loadingMessageVisible)
+				return;
+
+			if (PackagesCheckedCount > 0) {
+				AddPackagesButtonClicked (sender, e);
+			} else {
+				ManagePackagesSearchResultViewModel selectedPackageViewModel = GetSelectedPackageViewModel ();
+				ManagePackage (selectedPackageViewModel);
+			}
 		}
 
 		void PackagesListViewScrollValueChanged (object sender, EventArgs e)
@@ -962,6 +905,13 @@ namespace MonoDevelop.PackageManagement
 			double pageSize = scrollControl.PageSize;
 
 			return (currentValue / (maxValue - pageSize)) > 0.7;
+		}
+
+		void PackageCellViewPackageChecked (object sender, ManagePackagesCellViewEventArgs e)
+		{
+			UpdateAddPackagesButton ();
+			UpdatePackageListViewSelectionColor ();
+			UpdatePackageListViewCheckBoxAlpha ();
 		}
 
 		void UpdateAddPackagesButton ()
@@ -996,6 +946,22 @@ namespace MonoDevelop.PackageManagement
 				return PackagesCheckedCount;
 
 			return 1;
+		}
+
+		void UpdatePackageListViewSelectionColor ()
+		{
+			packageCellView.UseStrongSelectionColor = (PackagesCheckedCount == 0);
+		}
+
+		void UpdatePackageListViewCheckBoxAlpha ()
+		{
+			if (PackagesCheckedCount > 1)
+				return;
+
+			double alpha = GetPackageCheckBoxAlpha ();
+			for (int row = 0; row < packageStore.RowCount; ++row) {
+				packageStore.SetValue (row, packageCheckBoxAlphaField, alpha);
+			}
 		}
 
 		bool OlderPackageInstalledThanPackageSelected ()
@@ -1156,31 +1122,7 @@ namespace MonoDevelop.PackageManagement
 			UpdatePackageResultsLabel (ManagePackagesPage.Consolidate, consolidateLabel);
 		}
 
-		void UpdatePackageResultsLabel (ManagePackagesPage page, CustomButtonLabel label)
-		{
-			string text = (string)label.Tag;
-			if (page == viewModel.PageSelected) {
-				UpdatePackageResultsLabelA11y (label, true);
-				label.Markup = string.Format ("<b><u>{0}</u></b>", text);
-			} else {
-				UpdatePackageResultsLabelA11y (label, false);
-				label.Markup = text;
-			}
-		}
-
-		static void UpdatePackageResultsLabelA11y (Widget label, bool active)
-		{
-			if (label.Surface.ToolkitEngine.Type == ToolkitType.Gtk) {
-				var widget = label.Surface.NativeWidget as Gtk.Widget;
-				if (widget != null) {
-					widget.Accessible.SetValue (active);
-					// FIXME: Accessible.SetValue has no effect, so set the role description instead
-					widget.Accessible.SetRole (AtkCocoa.Roles.AXRadioButton, active ? "selected tab" : "tab");
-				}
-			}
-		}
-
-		void UpdatePackageResultsLabel (ManagePackagesPage page, Button label)
+		void UpdatePackageResultsLabel (ManagePackagesPage page, Label label)
 		{
 			string text = (string)label.Tag;
 			if (page == viewModel.PageSelected) {
@@ -1190,56 +1132,28 @@ namespace MonoDevelop.PackageManagement
 			}
 		}
 
-		void BrowseLabelButtonPressed (object sender, EventArgs e)
+		void BrowseLabelButtonPressed (object sender, ButtonEventArgs e)
 		{
 			viewModel.PageSelected = ManagePackagesPage.Browse;
 			OnPackageResultsPageSelected ();
 		}
 
-		void BrowseLabelKeyPressed (object sender, KeyEventArgs e)
-		{
-			if (e.Modifiers == ModifierKeys.None && (e.Key == Key.Return || e.Key == Key.Space || e.Key == Key.NumPadEnter)) {
-				BrowseLabelButtonPressed (sender, e);
-			}
-		}
-
-		void InstalledLabelButtonPressed (object sender, EventArgs e)
+		void InstalledLabelButtonPressed (object sender, ButtonEventArgs e)
 		{
 			viewModel.PageSelected = ManagePackagesPage.Installed;
 			OnPackageResultsPageSelected ();
 		}
 
-		void InstalledLabelKeyPressed (object sender, KeyEventArgs e)
-		{
-			if (e.Modifiers == ModifierKeys.None && (e.Key == Key.Return || e.Key == Key.Space || e.Key == Key.NumPadEnter)) {
-				InstalledLabelButtonPressed (sender, e);
-			}
-		}
-
-		void UpdatesLabelButtonPressed (object sender, EventArgs e)
+		void UpdatesLabelButtonPressed (object sender, ButtonEventArgs e)
 		{
 			viewModel.PageSelected = ManagePackagesPage.Updates;
 			OnPackageResultsPageSelected ();
 		}
 
-		void UpdatesLabelKeyPressed (object sender, KeyEventArgs e)
-		{
-			if (e.Modifiers == ModifierKeys.None && (e.Key == Key.Return || e.Key == Key.Space || e.Key == Key.NumPadEnter)) {
-				UpdatesLabelButtonPressed (sender, e);
-			}
-		}
-
-		void ConsolidateLabelButtonPressed (object sender, EventArgs e)
+		void ConsolidateLabelButtonPressed (object sender, ButtonEventArgs e)
 		{
 			viewModel.PageSelected = ManagePackagesPage.Consolidate;
 			OnPackageResultsPageSelected ();
-		}
-
-		void ConsolidateLabelKeyPressed (object sender, KeyEventArgs e)
-		{
-			if (e.Modifiers == ModifierKeys.None && (e.Key == Key.Return || e.Key == Key.Space || e.Key == Key.NumPadEnter)) {
-				ConsolidateLabelButtonPressed (sender, e);
-			}
 		}
 
 		void OnPackageResultsPageSelected ()

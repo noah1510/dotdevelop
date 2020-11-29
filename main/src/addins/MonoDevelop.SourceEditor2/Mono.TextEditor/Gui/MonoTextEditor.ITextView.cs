@@ -58,7 +58,9 @@ namespace Mono.TextEditor
 
 		ConnectionManager connectionManager;
 
-		TextEditorInitializationService factoryService;
+	//oe	TextEditorInitializationService factoryService;
+		TextEditorFactoryService factoryService;
+
 		int queuedSpaceReservationStackRefresh = 0;    //int so that it can be set via Interlocked.CompareExchange()
 
 		//		IEditorFormatMap _editorFormatMap;
@@ -67,6 +69,7 @@ namespace Mono.TextEditor
 
 		ITextSelection selection;
 
+	/* oe NOT IMPLEMENTED (int TextEditorFactoryService)...
 		private IEditorOperations editorOperations;
 		internal IEditorOperations EditorOperations 
 		{
@@ -79,7 +82,7 @@ namespace Mono.TextEditor
 
 				return editorOperations;
 			}
-		}
+		}	*/
 
 		bool hasAggregateFocus;
 
@@ -109,7 +112,8 @@ namespace Mono.TextEditor
 		/// <param name="roles">Roles for this view.</param>
 		/// <param name="parentOptions">Parent options for this view.</param>
 		/// <param name="factoryService">Our handy text editor factory service.</param>
-		internal void Initialize (ITextViewModel textViewModel, ITextViewRoleSet roles, IEditorOptions parentOptions, TextEditorInitializationService factoryService, bool initialize = true)
+	//oe	internal void Initialize (ITextViewModel textViewModel, ITextViewRoleSet roles, IEditorOptions parentOptions, TextEditorInitializationService factoryService, bool initialize = true)
+		internal void Initialize (ITextViewModel textViewModel, ITextViewRoleSet roles, IEditorOptions parentOptions, TextEditorFactoryService factoryService, bool initialize = true)
 		{
 			this.roles = roles;
 			this.factoryService = factoryService;
@@ -165,7 +169,7 @@ namespace Mono.TextEditor
 			// Without Undo History Roslyn Completion bails via:
 			// https://github.com/dotnet/roslyn/blob/a107b43dcad83cf79addd47a9919590c7366d130/src/EditorFeatures/Core/Implementation/IntelliSense/Completion/Controller_Commit.cs#L66
 			// See https://devdiv.visualstudio.com/DevDiv/_workitems/edit/669018 for details.
-			var instantiateEditorOperations = EditorOperations;
+		//oe	var instantiateEditorOperations = EditorOperations;
 
 			connectionManager = new ConnectionManager (this, factoryService.TextViewConnectionListeners, factoryService.GuardedOperations);
 
@@ -535,10 +539,12 @@ namespace Mono.TextEditor
 		public IGuardedOperations GuardedOperations;
 		internal MDSpaceReservationStack _spaceReservationStack;
 
-#if MAC
+//oe	#if MAC
+
 		// on Mac ITextView has the extra member GetSpaceReservationManager that isn't there on Windows
 		ISpaceReservationManager ITextView.GetSpaceReservationManager (string name) => throw new NotImplementedException();
-#endif
+
+//oe	#endif
 
 		public IMDSpaceReservationManager GetSpaceReservationManager (string name)
 		{
@@ -548,7 +554,8 @@ namespace Mono.TextEditor
 			return _spaceReservationStack.GetOrCreateManager (name);
 		}
 
-		internal TextEditorInitializationService ComponentContext {
+	//oe	internal TextEditorInitializationService ComponentContext {
+		internal TextEditorFactoryService ComponentContext {
 			get { return factoryService; }
 		}
 

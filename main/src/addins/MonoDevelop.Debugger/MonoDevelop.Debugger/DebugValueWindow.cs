@@ -25,29 +25,21 @@
 //
 //
 
-// Note: This is only used by the old (Gtk) TextEditor.
-
 using System;
-
-using Gdk;
-using Gtk;
-
 using Mono.Debugging.Client;
-
-using MonoDevelop.Ide;
-using MonoDevelop.Core;
 using MonoDevelop.Components;
+using Gtk;
+using Gdk;
+using MonoDevelop.Ide;
+
+// oe REVERTED from MD-8.3.
 
 namespace MonoDevelop.Debugger
 {
-	[Obsolete ("This API is only used by the old Gtk TextEditor")]
 	class DebugValueWindow : PopoverWindow
 	{
-		readonly bool useNewTreeView = PropertyService.Get ("MonoDevelop.Debugger.UseNewTreeView", true);
-		readonly ObjectValueTreeViewController controller;
-		readonly ObjectValueTreeView objValueTreeView;
-		readonly TreeView treeView;
-		readonly ScrolledWindow sw;
+		public ObjectValueTreeView Tree { get; }
+		ScrolledWindow sw;
 
 		static readonly string innerTreeName = "MonoDevelop.SourceEditor.DebugValueWindow.ObjectValueTreeView";
 		static string currentBgColor;
@@ -81,79 +73,52 @@ namespace MonoDevelop.Debugger
 			currentBgColor = bgColor;
 		}
 
-		public DebugValueWindow (Gtk.Window transientFor, PinnedWatchLocation location, StackFrame frame, ObjectValue value, PinnedWatch watch) : base (Gtk.WindowType.Toplevel)
+		public DebugValueWindow (Gtk.Window transientFor, string pinnedWatchFileName, int pinnedWatchLine, StackFrame frame, ObjectValue value, PinnedWatch watch) : base (Gtk.WindowType.Toplevel)
 		{
-			TypeHint = WindowTypeHint.PopupMenu;
-			AllowShrink = false;
-			AllowGrow = false;
-			Decorated = false;
+			this.TypeHint = WindowTypeHint.PopupMenu;
+			this.AllowShrink = false;
+			this.AllowGrow = false;
+			this.Decorated = false;
 
 			TransientFor = transientFor;
 			// Avoid getting the focus when the window is shown. We'll get it when the mouse enters the window
 			AcceptFocus = false;
 
-			sw = new ScrolledWindow {
-				HscrollbarPolicy = PolicyType.Never,
-				VscrollbarPolicy = PolicyType.Never
-			};
+			sw = new ScrolledWindow ();
+			sw.HscrollbarPolicy = PolicyType.Never;
+			sw.VscrollbarPolicy = PolicyType.Never;
 
 			UpdateTreeStyle (Theme.BackgroundColor);
+			Tree = new ObjectValueTreeView ();
+			Tree.Name = innerTreeName;
 
-			if (useNewTreeView) {
-				controller = new ObjectValueTreeViewController ();
-				controller.SetStackFrame (frame);
-				controller.AllowEditing = true;
-				controller.PinnedWatch = watch;
-				controller.PinnedWatchLocation = location;
-
-				treeView = controller.GetGtkControl (ObjectValueTreeViewFlags.TooltipFlags);
-
-				if (treeView is IObjectValueTreeView ovtv) {
-					ovtv.StartEditing += OnStartEditing;
-					ovtv.EndEditing += OnEndEditing;
-					ovtv.NodePinned += OnPinStatusChanged;
-				}
-
-				controller.AddValue (value);
-			} else {
-				objValueTreeView = new ObjectValueTreeView ();
-				objValueTreeView.RootPinAlwaysVisible = true;
-				objValueTreeView.HeadersVisible = false;
-				objValueTreeView.AllowEditing = true;
-				objValueTreeView.AllowPinning = true;
-				objValueTreeView.CompactView = true;
-				objValueTreeView.PinnedWatch = watch;
-				objValueTreeView.PinnedWatchLocation = location;
-				objValueTreeView.Frame = frame;
-
-				objValueTreeView.AddValue (value);
-
-				objValueTreeView.PinStatusChanged += OnPinStatusChanged;
-				objValueTreeView.StartEditing += OnStartEditing;
-				objValueTreeView.EndEditing += OnEndEditing;
-
-				treeView = objValueTreeView;
-			}
-
-			treeView.Name = innerTreeName;
-			treeView.Selection.UnselectAll ();
-			treeView.SizeAllocated += OnTreeSizeChanged;
-
-			sw.Add (treeView);
+			sw.Add (Tree);
 			ContentBox.Add (sw);
+
+			Tree.Frame = frame;
+			Tree.CompactView = true;
+			Tree.AllowAdding = false;
+			Tree.AllowEditing = true;
+			Tree.HeadersVisible = false;
+			Tree.AllowPinning = true;
+			Tree.RootPinAlwaysVisible = true;
+			Tree.PinnedWatch = watch;
+			Tree.PinnedWatchLine = pinnedWatchLine;
+			Tree.PinnedWatchFile = pinnedWatchFileName;
+
+			Tree.AddValue (value);
+			Tree.Selection.UnselectAll ();
+			Tree.SizeAllocated += OnTreeSizeChanged;
+			Tree.PinStatusChanged += OnPinStatusChanged;
+
 			sw.ShowAll ();
+
+			Tree.StartEditing += OnStartEditing;
+			Tree.EndEditing += OnEndEditing;
 
 			ShowArrow = true;
 			Theme.CornerRadius = 3;
 			PreviewWindowManager.WindowClosed += PreviewWindowManager_WindowClosed;
-		}
-
-		public DebuggerSession GetDebuggerSession ()
-		{
-			if (useNewTreeView)
-				return controller.GetStackFrame ()?.DebuggerSession;
-
-			return objValueTreeView.Frame?.DebuggerSession;
 		}
 
 		void OnStartEditing (object sender, EventArgs args)
@@ -173,20 +138,10 @@ namespace MonoDevelop.Debugger
 
 		protected override void OnDestroyed ()
 		{
-			if (useNewTreeView) {
-				if (treeView is IObjectValueTreeView ovtv) {
-					ovtv.StartEditing -= OnStartEditing;
-					ovtv.EndEditing -= OnEndEditing;
-					ovtv.NodePinned -= OnPinStatusChanged;
-				}
-			} else {
-				objValueTreeView.PinStatusChanged -= OnPinStatusChanged;
-				objValueTreeView.StartEditing -= OnStartEditing;
-				objValueTreeView.EndEditing -= OnEndEditing;
-			}
-
-			treeView.SizeAllocated -= OnTreeSizeChanged;
-
+			Tree.StartEditing -= OnStartEditing;
+			Tree.EndEditing -= OnEndEditing;
+			Tree.PinStatusChanged -= OnPinStatusChanged;
+			Tree.SizeAllocated -= OnTreeSizeChanged;
 			PreviewWindowManager.WindowClosed -= PreviewWindowManager_WindowClosed;
 
 			base.OnDestroyed ();
@@ -205,8 +160,8 @@ namespace MonoDevelop.Debugger
 			GetPosition (out x, out y);
 			h = (int)sw.Vadjustment.Upper;
 			w = (int)sw.Hadjustment.Upper;
-			int dy = y + h - Screen.Height;
-			int dx = x + w - Screen.Width;
+			int dy = y + h - this.Screen.Height;
+			int dx = x + w - this.Screen.Width;
 
 			if (dy > 0 && sw.VscrollbarPolicy == PolicyType.Never) {
 				sw.VscrollbarPolicy = PolicyType.Always;
@@ -227,17 +182,17 @@ namespace MonoDevelop.Debugger
 			QueueDraw ();
 		}
 
-		protected override void OnSizeAllocated (Rectangle allocation)
+		protected override void OnSizeAllocated (Gdk.Rectangle allocation)
 		{
-			if (Platform.IsMac || Platform.IsWindows) {
+			if (MonoDevelop.Core.Platform.IsMac || MonoDevelop.Core.Platform.IsWindows) {
 				// fails on linux see: Bug 8481 - Debug value tooltips very often appear at the top-left corner of the screen instead of near the element to inspect 
 				const int edgeGap = 2;
 				int oldY, x, y;
 
-				GetPosition (out x, out y);
+				this.GetPosition (out x, out y);
 				oldY = y;
 
-				var geometry = IdeServices.DesktopService.GetUsableMonitorGeometry (Screen.Number, Screen.GetMonitorAtPoint (x, y));
+				Xwt.Rectangle geometry = IdeServices.DesktopService.GetUsableMonitorGeometry (Screen.Number, Screen.GetMonitorAtPoint (x, y));
 				int top = (int)geometry.Top;
 				if (allocation.Height <= geometry.Height && y + allocation.Height >= geometry.Y + geometry.Height - edgeGap)
 					y = top + ((int)geometry.Height - allocation.Height - edgeGap);
@@ -258,7 +213,7 @@ namespace MonoDevelop.Debugger
 			// When Preview window is closed we want to put focus(IsActive=true) back on DebugValueWindow
 			// otherwise CommandManager will think IDE doesn't have any window Active/Focused and think
 			// user switched to another app and DebugValueWindow will closed itself on "FocusOut" event
-			Present ();
+			this.Present ();
 		}
 	}
 }

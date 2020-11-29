@@ -24,8 +24,6 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-
-
 using System;
 using Gtk;
 using Gdk;
@@ -37,6 +35,9 @@ namespace MonoDevelop.VersionControl.Views
 {
 	public abstract partial class EditorCompareWidgetBase
 	{
+
+// oe REVERTED from MD-8.3.
+
 		class DiffScrollbar : DrawingArea
 		{
 			MonoTextEditor editor;
@@ -44,7 +45,7 @@ namespace MonoDevelop.VersionControl.Views
 			bool useLeftDiff;
 			bool paintInsert;
 			Adjustment vAdjustment;
-
+			
 			public DiffScrollbar (EditorCompareWidgetBase widget, MonoTextEditor editor, bool useLeftDiff, bool paintInsert)
 			{
 				this.editor = editor;
@@ -109,13 +110,13 @@ namespace MonoDevelop.VersionControl.Views
 				if (widget.LeftDiff == null)
 					return true;
 				var adj = widget.vAdjustment;
-
+				
 				var diff = useLeftDiff ? widget.LeftDiff : widget.RightDiff;
-
+				
 				using (Cairo.Context cr = Gdk.CairoHelper.Create (e.Window)) {
 					cr.LineWidth = 1;
 					double curY = 0;
-
+					
 					foreach (var hunk in diff) {
 						double y, count;
 						if (paintInsert) {
@@ -125,10 +126,10 @@ namespace MonoDevelop.VersionControl.Views
 							y = hunk.RemoveStart / (double)editor.LineCount;
 							count = hunk.Removed / (double)editor.LineCount;
 						}
-
-						double start = y * Allocation.Height;
+						
+						double start  = y *  Allocation.Height;
 						FillGradient (cr, 0.5 + curY, start - curY);
-
+						
 						curY = start;
 						double height = Math.Max (cr.LineWidth, count * Allocation.Height);
 						cr.Rectangle (0.5, 0.5 + curY, Allocation.Width, height);
@@ -136,23 +137,23 @@ namespace MonoDevelop.VersionControl.Views
 						cr.Fill ();
 						curY += height;
 					}
-
+					
 					FillGradient (cr, 0.5 + curY, Allocation.Height - curY);
-
+					
 					int barPadding = 3;
 					var allocH = Allocation.Height;
 					var adjUpper = adj.Upper;
 					var barY = allocH * adj.Value / adjUpper + barPadding;
 					var barH = allocH * (adj.PageSize / adjUpper) - barPadding - barPadding;
 					DrawBar (cr, barY, barH);
-
+					
 					cr.Rectangle (0.5, 0.5, Allocation.Width - 1, Allocation.Height - 1);
 					cr.SetSourceColor ((HslColor)Style.Dark (StateType.Normal));
 					cr.Stroke ();
 				}
 				return true;
 			}
-
+			
 			void FillGradient (Cairo.Context cr, double y, double h)
 			{
 				cr.Rectangle (0.5, y, Allocation.Width, h);
@@ -168,31 +169,31 @@ namespace MonoDevelop.VersionControl.Views
 					cr.Fill ();
 				}
 			}
-
+			
 			void DrawBar (Cairo.Context cr, double y, double h)
 			{
 				int barPadding = 3;
 				int barWidth = Allocation.Width - barPadding - barPadding;
-
-				MonoDevelop.Components.CairoExtensions.RoundedRectangle (cr,
+				
+				MonoDevelop.Components.CairoExtensions.RoundedRectangle (cr, 
 					barPadding,
 					y,
 					barWidth,
 					h,
 					barWidth / 2);
-
+				
 				var color = Ide.Gui.Styles.BaseBackgroundColor;
 				color.Light = 0.5;
 				cr.SetSourceColor (color.WithAlpha (0.6).ToCairoColor ());
 				cr.Fill ();
 			}
-
+	
 			static void IncPos (Hunk h, ref int pos)
 			{
 				pos += System.Math.Max (h.Inserted, h.Removed);
 			}
 		}
-	}
 
+	}
 }
 

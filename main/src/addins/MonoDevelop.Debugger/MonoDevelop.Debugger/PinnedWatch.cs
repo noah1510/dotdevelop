@@ -31,6 +31,8 @@ using MonoDevelop.Core.Serialization;
 using MonoDevelop.Projects;
 using Mono.Debugging.Backend;
 
+// oe REVERTED from MD-8.3.
+
 namespace MonoDevelop.Debugger
 {
 	public class PinnedWatch
@@ -40,16 +42,7 @@ namespace MonoDevelop.Debugger
 		
 		[ItemProperty]
 		int line;
-
-		[ItemProperty]
-		int column;
-
-		[ItemProperty]
-		int endLine;
-
-		[ItemProperty]
-		int endColumn;
-
+		
 		[ItemProperty (DefaultValue = 0)]
 		int offsetX;
 		
@@ -120,42 +113,6 @@ namespace MonoDevelop.Debugger
 		public int Line {
 			get { return line; }
 			set { line = value; NotifyChanged (); }
-		}
-
-		public int Column {
-			get { return column; }
-			set { column = value; NotifyChanged (); }
-		}
-
-		public int EndLine {
-			get { return endLine; }
-			set { endLine = value; NotifyChanged (); }
-		}
-
-		public int EndColumn {
-			get { return endColumn; }
-			set { endColumn = value; NotifyChanged (); }
-		}
-
-		public PinnedWatchLocation Location {
-			get { return new PinnedWatchLocation (File, Line, Column, EndLine, EndColumn); }
-			set {
-				if (value != null) {
-					file = value.FileName;
-					line = value.Line;
-					column = value.Column;
-					endLine = value.EndLine;
-					endColumn = value.EndColumn;
-				} else {
-					file = null;
-					line = 0;
-					column = 0;
-					endLine = 0;
-					endColumn = 0;
-				}
-
-				NotifyChanged ();
-			}
 		}
 
 		public int OffsetX {

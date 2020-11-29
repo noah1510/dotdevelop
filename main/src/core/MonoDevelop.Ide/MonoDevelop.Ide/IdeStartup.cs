@@ -456,8 +456,16 @@ namespace MonoDevelop.Ide
 
 		static bool OnIdle ()
 		{
+
+Console.WriteLine( "oeDEBUG :: IdeStartup.OnIdle() cm initialized" );
+
 			// OpenDocuments appears when the app is idle.
 			if (!hideWelcomePage && !WelcomePage.WelcomePageService.HasWindowImplementation) {
+
+				// oe NOTICE need to do this first???
+				// -> YES otherwise the welcome page is not shown.
+				// -> this seems to be the normal order in MD-8.4.
+
 				IdeApp.Workbench.Present ();
 				WelcomePage.WelcomePageService.ShowWelcomePage ();
 				Counters.InitializationTracker.Trace ("Showed welcome page");

@@ -29,8 +29,8 @@ using MonoDevelop.Core;
 using MonoDevelop.Components.AtkCocoaHelper;
 using Gtk;
 using System.Diagnostics;
-using AppKit;
-using Foundation;
+//using AppKit; oe REMOVED...
+//using Foundation; oe REMOVED...
 using MonoDevelop.Components;
 using Xwt.Drawing;
 

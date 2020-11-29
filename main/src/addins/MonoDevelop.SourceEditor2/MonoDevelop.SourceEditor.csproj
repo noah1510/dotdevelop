@@ -182,7 +182,6 @@
     <Compile Include="Mono.TextEditor.Theatrics\SingleActorStage.cs" />
     <Compile Include="Mono.TextEditor.Theatrics\SmartScrolledWindow.cs" />
     <Compile Include="Mono.TextEditor.Theatrics\Stage.cs" />
-    <Compile Include="VSEditor\TextEditorInitializationService.cs" />
     <Compile Include="MonoDevelop.SourceEditor\TextMarker\LineSeparatorMarker.cs" />
     <Compile Include="MonoDevelop.SourceEditor.QuickTasks\QuickTaskOverviewMode.IndicatorDrawingCache.cs" />
     <Compile Include="MonoDevelop.SourceEditor.QuickTasks\QuickTaskOverviewMode.IdleUpdater.cs" />
@@ -193,6 +192,7 @@
     <Compile Include="VSEditor\MDUtils.cs" />
     <Compile Include="VSEditor\SmartIndentationService.cs" />
     <Compile Include="VSEditor\TagBasedSyntaxHighlighting.cs" />
+    <Compile Include="VSEditor\TextEditorFactoryService.cs" />
     <Compile Include="VSEditor\TextSelection.cs" />
     <Compile Include="VSEditor\TextViewRoleSet.cs" />
     <Compile Include="VSEditor\FakeWpf\SimulatingExtensions.cs" />

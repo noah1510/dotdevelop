@@ -1059,7 +1059,9 @@ namespace MonoDevelop.Ide.Editor
 
 			TextEditor_MimeTypeChanged (null, null);
 
-			this.TextView = CompositionManager.Instance.GetExportedValue<ITextEditorInitializationService> ().CreateTextView (this);
+		// oe NOTICE old-editor instance creation...
+		//oe	this.TextView = CompositionManager.Instance.GetExportedValue<ITextEditorInitializationService> ().CreateTextView (this);
+			this.TextView = Microsoft.VisualStudio.Platform.PlatformCatalog.Instance.TextEditorFactoryService.CreateTextView(this);
 		}
 
 		void TextEditor_ZoomLevelChanged (object sender, EventArgs e)

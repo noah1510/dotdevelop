@@ -32,6 +32,8 @@ using MonoDevelop.Ide;
 using Xwt;
 using Xwt.Drawing;
 
+// oe REVERTED from MD-8.3.
+
 namespace MonoDevelop.PackageManagement
 {
 	internal partial class ManagePackagesDialog : ExtendedTitleBarDialog
@@ -61,15 +63,13 @@ namespace MonoDevelop.PackageManagement
 		Label errorMessageLabel;
 		Label loadingSpinnerLabel;
 		FrameBox noPackagesFoundFrame;
-		Label noPackagesFoundLabel;
 		ComboBox packageVersionComboBox;
 		HBox packageVersionsHBox;
 		Label packageVersionsLabel;
-		CustomButtonLabel browseLabel;
-		CustomButtonLabel installedLabel;
-		CustomButtonLabel updatesLabel;
-		CustomButtonLabel consolidateLabel;
-		HBox tabGroup;
+		Label browseLabel;
+		Label installedLabel;
+		Label updatesLabel;
+		Label consolidateLabel;
 		VBox projectsListViewVBox;
 		Label projectsListViewLabel;
 		ListView projectsListView;
@@ -96,56 +96,40 @@ namespace MonoDevelop.PackageManagement
 			var topHBox = new HBox ();
 			topHBox.Margin = new WidgetSpacing (8, 5, 6, 5);
 
-			// HACK: VoiceOver does not work when using Accessible.Label so workaround this by using
-			// Accessible.LabelWidget and hide the label since we do not need it.
-			var packageSourceLabel = new Label ();
-			packageSourceLabel.Text = GettextCatalog.GetString ("Package source");
-			packageSourceLabel.Visible = false;
-			topHBox.PackStart (packageSourceLabel);
-
 			packageSourceComboBox = new ComboBox ();
 			packageSourceComboBox.Name = "packageSourceComboBox";
 			packageSourceComboBox.MinWidth = 200;
-			// Does not work:
-			//packageSourceComboBox.Accessible.Label = GettextCatalog.GetString ("Package source");
-			packageSourceComboBox.Accessible.LabelWidget = packageSourceLabel;
 			topHBox.PackStart (packageSourceComboBox);
 
-			tabGroup = new HBox ();
-
 			int tabLabelMinWidth = 60;
-			browseLabel = new CustomButtonLabel ();
+			browseLabel = new Label ();
 			browseLabel.Text = GettextCatalog.GetString ("Browse");
 			browseLabel.Tag = browseLabel.Text;
 			browseLabel.MinWidth = tabLabelMinWidth;
 			browseLabel.MarginLeft = 10;
-			tabGroup.PackStart (browseLabel);
+			topHBox.PackStart (browseLabel);
 
-			installedLabel = new CustomButtonLabel ();
+			installedLabel = new Label ();
 			installedLabel.Text = GettextCatalog.GetString ("Installed");
 			installedLabel.Tag = installedLabel.Text;
 			installedLabel.MinWidth = tabLabelMinWidth;
-			tabGroup.PackStart (installedLabel);
+			topHBox.PackStart (installedLabel);
 
-			updatesLabel = new CustomButtonLabel ();
+			updatesLabel = new Label ();
 			updatesLabel.Text = GettextCatalog.GetString ("Updates");
 			updatesLabel.Tag = updatesLabel.Text;
 			updatesLabel.MinWidth = tabLabelMinWidth;
-			tabGroup.PackStart (updatesLabel);
+			topHBox.PackStart (updatesLabel);
 
-			consolidateLabel = new CustomButtonLabel ();
+			consolidateLabel = new Label ();
 			consolidateLabel.Text = GettextCatalog.GetString ("Consolidate");
 			consolidateLabel.Tag = consolidateLabel.Text;
 			consolidateLabel.MinWidth = tabLabelMinWidth;
-			tabGroup.PackStart (consolidateLabel);
-
-			topHBox.PackStart (tabGroup);
+			topHBox.PackStart (consolidateLabel);
 
 			packageSearchEntry = new SearchTextEntry ();
 			packageSearchEntry.Name = "managePackagesDialogSearchEntry";
 			packageSearchEntry.WidthRequest = 187;
-			packageSearchEntry.PlaceholderText = GettextCatalog.GetString ("Search");
-			packageSearchEntry.Accessible.Label = GettextCatalog.GetString ("Package Search");
 			topHBox.PackEnd (packageSearchEntry);
 
 			this.HeaderContent = topHBox;
@@ -187,7 +171,6 @@ namespace MonoDevelop.PackageManagement
 			packagesListView = new ListView ();
 			packagesListView.BorderVisible = false;
 			packagesListView.HeadersVisible = false;
-			packagesListView.Accessible.Label = GettextCatalog.GetString ("Packages");
 			packagesListVBox.PackStart (packagesListView, true, true);
 
 			// Loading spinner.
@@ -213,7 +196,7 @@ namespace MonoDevelop.PackageManagement
 			var noPackagesFoundHBox = new HBox ();
 			noPackagesFoundHBox.HorizontalPlacement = WidgetPlacement.Center;
 
-			noPackagesFoundLabel = new Label ();
+			var noPackagesFoundLabel = new Label ();
 			noPackagesFoundLabel.Text = GettextCatalog.GetString ("No matching packages found.");
 			noPackagesFoundHBox.PackEnd (noPackagesFoundLabel);
 
@@ -282,19 +265,17 @@ namespace MonoDevelop.PackageManagement
 
 			var packageIdLabel = new Label ();
 			packageIdLabel.Font = packageInfoBoldFont;
-			packageIdLabel.Text = GettextCatalog.GetString ("ID");
+			packageIdLabel.Text = GettextCatalog.GetString ("Id");
 			packageIdHBox.PackStart (packageIdLabel);
 
 			packageId = new Label ();
 			packageId.Ellipsize = EllipsizeMode.End;
 			packageId.TextAlignment = Alignment.End;
 			packageId.Font = packageInfoSmallFont;
-			packageId.Accessible.LabelWidget = packageIdLabel;
 			packageIdLink = new LinkLabel ();
 			packageIdLink.Ellipsize = EllipsizeMode.End;
 			packageIdLink.TextAlignment = Alignment.End;
 			packageIdLink.Font = packageInfoSmallFont;
-			packageIdLink.Accessible.LabelWidget = packageIdLabel;
 			packageIdHBox.PackEnd (packageIdLink, true);
 			packageIdHBox.PackEnd (packageId, true);
 
@@ -311,7 +292,6 @@ namespace MonoDevelop.PackageManagement
 			packageAuthor.TextAlignment = Alignment.End;
 			packageAuthor.Ellipsize = EllipsizeMode.End;
 			packageAuthor.Font = packageInfoSmallFont;
-			packageAuthor.Accessible.LabelWidget = packageAuthorLabel;
 			packageAuthorHBox.PackEnd (packageAuthor, true);
 
 			// Package published
@@ -325,7 +305,6 @@ namespace MonoDevelop.PackageManagement
 
 			packagePublishedDate = new Label ();
 			packagePublishedDate.Font = packageInfoSmallFont;
-			packagePublishedDate.Accessible.LabelWidget = packagePublishedLabel;
 			packagePublishedHBox.PackEnd (packagePublishedDate);
 
 			// Package downloads
@@ -339,7 +318,6 @@ namespace MonoDevelop.PackageManagement
 
 			packageDownloads = new Label ();
 			packageDownloads.Font = packageInfoSmallFont;
-			packageDownloads.Accessible.LabelWidget = packageDownloadsLabel;
 			packageDownloadsHBox.PackEnd (packageDownloads);
 
 			// Package license.
@@ -368,7 +346,6 @@ namespace MonoDevelop.PackageManagement
 			packageProjectPageLink = new LinkLabel ();
 			packageProjectPageLink.Text = GettextCatalog.GetString ("Visit Page");
 			packageProjectPageLink.Font = packageInfoSmallFont;
-			packageProjectPageLink.Accessible.Label = GettextCatalog.GetString ("Visit Project Page");
 			packageProjectPageHBox.PackEnd (packageProjectPageLink);
 
 			// Package dependencies
@@ -383,7 +360,6 @@ namespace MonoDevelop.PackageManagement
 			packageDependenciesNoneLabel = new Label ();
 			packageDependenciesNoneLabel.Text = GettextCatalog.GetString ("None");
 			packageDependenciesNoneLabel.Font = packageInfoSmallFont;
-			packageDependenciesNoneLabel.Accessible.LabelWidget = packageDependenciesLabel;
 			packageDependenciesHBox.PackEnd (packageDependenciesNoneLabel);
 
 			// Package dependencies list.
@@ -395,7 +371,6 @@ namespace MonoDevelop.PackageManagement
 			packageDependenciesList.Wrap = WrapMode.WordAndCharacter;
 			packageDependenciesList.Margin = new WidgetSpacing (5);
 			packageDependenciesList.Font = packageInfoSmallFont;
-			packageDependenciesList.Accessible.LabelWidget = packageDependenciesLabel;
 			packageDependenciesListHBox.PackStart (packageDependenciesList, true);
 
 			// Current package version.
@@ -417,13 +392,11 @@ namespace MonoDevelop.PackageManagement
 
 			currentPackageVersion = new Label ();
 			currentPackageVersion.Font = packageInfoSmallFont;
-			currentPackageVersion.Accessible.LabelWidget = currentPackageVersionLabel;
 			currentPackageVersionWithInfoPopoverHBox.PackStart (currentPackageVersion);
 
 			currentPackageVersionInfoPopoverWidget = new InformationPopoverWidget ();
 			currentPackageVersionInfoPopoverWidget.Severity = Ide.Tasks.TaskSeverity.Information;
 			currentPackageVersionInfoPopoverWidget.Margin = new WidgetSpacing (5, 0, 0, 2);
-			currentPackageVersionInfoPopoverWidget.Accessible.LabelWidget = currentPackageVersionLabel;
 			currentPackageVersionWithInfoPopoverHBox.PackStart (currentPackageVersionInfoPopoverWidget);
 
 			currentPackageVersionHBox.PackStart (currentPackageVersionWithInfoPopoverHBox);
@@ -441,7 +414,6 @@ namespace MonoDevelop.PackageManagement
 
 			packageVersionComboBox = new ComboBox ();
 			packageVersionComboBox.Name = "packageVersionComboBox";
-			packageVersionComboBox.Accessible.LabelWidget = packageVersionsLabel;
 			packageVersionsHBox.Spacing = 15;
 			packageVersionsHBox.PackStart (packageVersionComboBox, true, true);
 
@@ -500,64 +472,6 @@ namespace MonoDevelop.PackageManagement
 				currentPackageVersionLabel.WidthRequest = packageVersionsLabelWidth;
 				maxPackageVersionLabelWidth = packageVersionsLabelWidth;
 			}
-		}
-	}
-
-	sealed class CustomButtonLabel : Canvas
-	{
-		readonly TextLayout layout = new TextLayout ();
-		Size preferredSize;
-
-		public string Text {
-			get { return layout.Text; }
-			set {
-				layout.Markup = null;
-				layout.Text = value;
-				Accessible.Title = layout.Text;
-				preferredSize = layout.GetSize ();
-				OnPreferredSizeChanged ();
-			}
-		}
-
-		public string Markup {
-			get { return layout.Markup; }
-			set {
-				layout.Markup = value;
-				Accessible.Title = layout.Text;
-				preferredSize = layout.GetSize ();
-				OnPreferredSizeChanged ();
-			}
-		}
-
-		public CustomButtonLabel ()
-		{
-			CanGetFocus = true;
-			Accessible.Role = Xwt.Accessibility.Role.Button;
-		}
-
-		protected override Size OnGetPreferredSize (SizeConstraint widthConstraint, SizeConstraint heightConstraint)
-		{
-			return preferredSize;
-		}
-
-		protected override void OnDraw (Context ctx, Rectangle dirtyRect)
-		{
-			if (HasFocus) {
-				ctx.SetColor (Ide.Gui.Styles.BaseSelectionBackgroundColor);
-			}
-			var actualSize = Size;
-			var x = Math.Max (0, (actualSize.Width - preferredSize.Width) / 2);
-			var y = Math.Max (0, (actualSize.Height - preferredSize.Height) / 2);
-			x += x % 2; // align pixels
-			ctx.DrawTextLayout (layout, x, y);
-		}
-
-		protected override void Dispose (bool disposing)
-		{
-			if (disposing) {
-				layout.Dispose ();
-			}
-			base.Dispose (disposing);
 		}
 	}
 }
