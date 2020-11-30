@@ -467,6 +467,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MonoDevelop.VersionControl.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibGit2Sharp", "external\libgit2sharp\LibGit2Sharp\LibGit2Sharp.csproj", "{032AD557-4992-4BC1-9393-0108F3F505B6}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MonoDevelop.Debugger.DotNetCore", "external\Monodevelop.Netcoredbg\MonoDevelop.Debugger.DotNetCore\MonoDevelop.Debugger.DotNetCore.csproj", "{F7E2B0AA-BD5E-4664-94B8-331EDB4BDEAE}"
+EndProject
 
 
 
@@ -2754,6 +2756,22 @@ Global
 		{032AD557-4992-4BC1-9393-0108F3F505B6}.ReleaseMac|Any CPU.Build.0 = Debug|Any CPU
 		{032AD557-4992-4BC1-9393-0108F3F505B6}.ReleaseWin32|Any CPU.ActiveCfg = Debug|Any CPU
 		{032AD557-4992-4BC1-9393-0108F3F505B6}.ReleaseWin32|Any CPU.Build.0 = Debug|Any CPU
+		{F7E2B0AA-BD5E-4664-94B8-331EDB4BDEAE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F7E2B0AA-BD5E-4664-94B8-331EDB4BDEAE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F7E2B0AA-BD5E-4664-94B8-331EDB4BDEAE}.DebugGnome|Any CPU.ActiveCfg = Debug|Any CPU
+		{F7E2B0AA-BD5E-4664-94B8-331EDB4BDEAE}.DebugGnome|Any CPU.Build.0 = Debug|Any CPU
+		{F7E2B0AA-BD5E-4664-94B8-331EDB4BDEAE}.DebugMac|Any CPU.ActiveCfg = Debug|Any CPU
+		{F7E2B0AA-BD5E-4664-94B8-331EDB4BDEAE}.DebugMac|Any CPU.Build.0 = Debug|Any CPU
+		{F7E2B0AA-BD5E-4664-94B8-331EDB4BDEAE}.DebugWin32|Any CPU.ActiveCfg = Debug|Any CPU
+		{F7E2B0AA-BD5E-4664-94B8-331EDB4BDEAE}.DebugWin32|Any CPU.Build.0 = Debug|Any CPU
+		{F7E2B0AA-BD5E-4664-94B8-331EDB4BDEAE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F7E2B0AA-BD5E-4664-94B8-331EDB4BDEAE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F7E2B0AA-BD5E-4664-94B8-331EDB4BDEAE}.ReleaseGnome|Any CPU.ActiveCfg = Debug|Any CPU
+		{F7E2B0AA-BD5E-4664-94B8-331EDB4BDEAE}.ReleaseGnome|Any CPU.Build.0 = Debug|Any CPU
+		{F7E2B0AA-BD5E-4664-94B8-331EDB4BDEAE}.ReleaseMac|Any CPU.ActiveCfg = Debug|Any CPU
+		{F7E2B0AA-BD5E-4664-94B8-331EDB4BDEAE}.ReleaseMac|Any CPU.Build.0 = Debug|Any CPU
+		{F7E2B0AA-BD5E-4664-94B8-331EDB4BDEAE}.ReleaseWin32|Any CPU.ActiveCfg = Debug|Any CPU
+		{F7E2B0AA-BD5E-4664-94B8-331EDB4BDEAE}.ReleaseWin32|Any CPU.Build.0 = Debug|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -2974,6 +2992,7 @@ Global
 
 		{0413DB7D-8B35-423F-9752-D75C9225E7DE} = {DEEB9163-3966-4E5E-9AB5-FBB3E01AC82A}
 		{032AD557-4992-4BC1-9393-0108F3F505B6} = {DEEB9163-3966-4E5E-9AB5-FBB3E01AC82A}
+		{F7E2B0AA-BD5E-4664-94B8-331EDB4BDEAE} = {A026D596-3C8D-4521-BB42-2C898FA3BE2D}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {856CF524-E2A7-4DB0-B80F-8F1B080A2E25}

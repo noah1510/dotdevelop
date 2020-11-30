@@ -56,3 +56,11 @@
 	path = main/external/libgit2sharp
 	url = git://github.com/dotdevelop/libgit2sharp.git
 	branch = dotdevelop
+[submodule "main/external/Monodevelop.Netcoredbg"]
+	path = main/external/Monodevelop.Netcoredbg
+	url = git://github.com/dotdevelop/monodevelop.netcoredbg.git
+	branch = dotdevelop
+[submodule "main/external/Samsung.Netcoredbg"]
+	path = main/external/Samsung.Netcoredbg
+	url = git://github.com/dotdevelop/netcoredbg.git
+    branch = dotdevelop
