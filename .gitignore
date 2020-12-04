@@ -279,3 +279,7 @@ main/po/StripMnemonics.exe
 *.binlog
 *.ProjectImports.zip
 main/tests/StressTest/bin
+
+#rider
+main/.idea/
+.idea/
