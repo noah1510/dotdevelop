@@ -1,8 +1,5 @@
 **MonoDevelop** is a full-featured integrated development environment (IDE) for mono using Gtk#.
 
-The MonoDevelop core is also the foundation for Visual Studio for Mac.
-Feel free to file bugs against Visual Studio for Mac here as well.
-
 See http://www.monodevelop.com for more info.
 
 [![Build Status](http://jenkins.mono-project.com/job/test-monodevelop-mainline/badge/icon)](http://jenkins.mono-project.com/job/test-monodevelop-mainline/)
@@ -31,23 +28,7 @@ while having sourced your mono installation script. (source path/to/my-environme
 See: http://www.mono-project.com/Parallel_Mono_Environments
 
 To compile execute:
-`./configure ; make`
-
-There are two variables you can set when running `configure`:
-
-* The install prefix: `--prefix=/path/to/prefix`
-
-  * To install with the rest of the assemblies, use:
-  `--prefix="pkg-config --variable=prefix mono"`
-
-* The build profile: `--profile=profile-name`
-
-  * `stable`: builds the MonoDevelop core and some stable extra add-ins.
-  * `core`: builds the MonoDevelop core only.
-  * `all`: builds everything
-  * `mac`: builds for Mac OS X
-
-**PS:** You can also create your own profile by adding a file to the profiles directory containing a list of the directories to build.
+`./configure --profile=gnome; make`
 
 Disclaimer: Please be aware that the 'extras/JavaBinding' and 'extras/ValaBinding' packages do not currently work. When prompted or by manually selecting them during the './configure --select' step, make sure they stay deselected. (deselected by default)
 
@@ -60,9 +41,8 @@ You can run MonoDevelop from the build directory by executing:
 Debugging
 ---------
 
-You can debug MonoDevelop using Visual Studio (on Windows or macOS) with the
-`main/Main.sln` solution. Use the `DebugWin32` configuration on Windows and the
-`DebugMac` configuration on macOS.
+You can debug MonoDevelop using MonoDevelop (on Linux) with the `main/Main.sln` solution.
+Use the `DebugGnome` configuration on Linux.
 
 Installing *(Optional)*
 ----------
@@ -75,18 +55,9 @@ Bear in mind that if you are installing under a custom prefix, you may need to m
 *(It's possible that you need to install for your locale to be
 correctly set.)*
 
-Packaging for OS X
------------------
-
-To package MonoDevelop for OS X in a convenient MonoDevelop.app
-file, just do this after MonoDevelop has finished building (with
-`make`): `cd main/build/MacOSX ; make app`.
-You can run MonoDevelop: `open MonoDevelop.app` or build dmg package: `./make-dmg-bundle.sh`
-
 Dependencies
 ------------
 
-- [Windows](https://github.com/mono/md-website/blob/gh-pages/developers/building-monodevelop.md#prerequisites-and-source)
 - [Unix](http://www.monodevelop.com/developers/building-monodevelop/#linux)
 
 Special Environment Variables
@@ -126,11 +97,7 @@ References
 Discussion, Bugs, Patches
 -------------------------
 
-monodevelop-list@lists.ximian.com *(questions and discussion)*
+https://github.com/dotdevelop/community *(questions and discussion)*
 
-monodevelop-patches-list@lists.ximian.com *(track commits to MonoDevelop)*
-
-monodevelop-bugs@lists.ximian.com *(track MonoDevelop bugzilla component)*
-
-https://github.com/mono/monodevelop/issues/new *(submit bugs and patches here)*
+https://github.com/dotdevelop/dotdevelop/issues
 
