@@ -12,7 +12,7 @@ Currently the best working branch is:
  https://github.com/dotdevelop/dotdevelop/tree/dotdevelop_oe_8.4.3.12
 
 
-To hack around on version 8.2.6, get a compiling copy from branch dotdevelop_oe_8.4.3.12 as follows:
+To hack around on version 8.4.3.12, get a compiling copy from branch dotdevelop_oe_8.4.3.12 as follows:
 
 ```
 git clone -b dotdevelop_oe_8.4.3.12 https://github.com/dotdevelop/dotdevelop.git
