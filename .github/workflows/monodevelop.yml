@@ -1,0 +1,22 @@
+name: MonoDevelop
+
+on:
+  push:
+    branches: [ * ]
+  pull_request:
+    branches: [ * ]
+
+jobs:
+  build:
+  
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v2
+    - name: Configure
+      shell: bash
+      run: ./configure --profile=gnome
+    - name: Build
+      shell: bash
+      run: make
+    
