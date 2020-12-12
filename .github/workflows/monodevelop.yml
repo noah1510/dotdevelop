@@ -15,12 +15,7 @@ jobs:
     
     steps:
     - uses: actions/checkout@v2
-    - name: Install dependencies
-      shell: bash
-      run: sudo apt install intltool
-    - name: Configure
-      shell: bash
-      run: ./configure --profile=gnome
-    - name: Build
-      shell: bash
-      run: make    
+    - run: |
+        sudo apt install intltool
+        ./configure --profile=gnome
+        make    
