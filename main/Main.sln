@@ -471,10 +471,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TextUIGtkUtil", "external\v
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MonoDevelop.Debugger.DotNetCore", "external\Monodevelop.Netcoredbg\MonoDevelop.Debugger.DotNetCore\MonoDevelop.Debugger.DotNetCore.csproj", "{0A634A37-FEFB-403E-893E-99DAD6578620}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MonoDevelop.VersionControl.Git", "src\addins\VersionControl\MonoDevelop.VersionControl.Git\MonoDevelop.VersionControl.Git.csproj", "{0413DB7D-8B35-423F-9752-D75C9225E7DE}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibGit2Sharp", "external\libgit2sharp\LibGit2Sharp\LibGit2Sharp.csproj", "{C2B3C01E-1A8C-4F68-AD7D-F5A0638A7FB5}"
-EndProject
 
 
 
@@ -2735,38 +2731,6 @@ Global
 		{0A634A37-FEFB-403E-893E-99DAD6578620}.ReleaseMac|Any CPU.Build.0 = Debug|Any CPU
 		{0A634A37-FEFB-403E-893E-99DAD6578620}.ReleaseWin32|Any CPU.ActiveCfg = Debug|Any CPU
 		{0A634A37-FEFB-403E-893E-99DAD6578620}.ReleaseWin32|Any CPU.Build.0 = Debug|Any CPU
-		{0413DB7D-8B35-423F-9752-D75C9225E7DE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{0413DB7D-8B35-423F-9752-D75C9225E7DE}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{0413DB7D-8B35-423F-9752-D75C9225E7DE}.DebugGnome|Any CPU.ActiveCfg = DebugGnome|Any CPU
-		{0413DB7D-8B35-423F-9752-D75C9225E7DE}.DebugGnome|Any CPU.Build.0 = DebugGnome|Any CPU
-		{0413DB7D-8B35-423F-9752-D75C9225E7DE}.DebugMac|Any CPU.ActiveCfg = DebugMac|Any CPU
-		{0413DB7D-8B35-423F-9752-D75C9225E7DE}.DebugMac|Any CPU.Build.0 = DebugMac|Any CPU
-		{0413DB7D-8B35-423F-9752-D75C9225E7DE}.DebugWin32|Any CPU.ActiveCfg = DebugWin32|Any CPU
-		{0413DB7D-8B35-423F-9752-D75C9225E7DE}.DebugWin32|Any CPU.Build.0 = DebugWin32|Any CPU
-		{0413DB7D-8B35-423F-9752-D75C9225E7DE}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{0413DB7D-8B35-423F-9752-D75C9225E7DE}.Release|Any CPU.Build.0 = Release|Any CPU
-		{0413DB7D-8B35-423F-9752-D75C9225E7DE}.ReleaseGnome|Any CPU.ActiveCfg = ReleaseGnome|Any CPU
-		{0413DB7D-8B35-423F-9752-D75C9225E7DE}.ReleaseGnome|Any CPU.Build.0 = ReleaseGnome|Any CPU
-		{0413DB7D-8B35-423F-9752-D75C9225E7DE}.ReleaseMac|Any CPU.ActiveCfg = ReleaseMac|Any CPU
-		{0413DB7D-8B35-423F-9752-D75C9225E7DE}.ReleaseMac|Any CPU.Build.0 = ReleaseMac|Any CPU
-		{0413DB7D-8B35-423F-9752-D75C9225E7DE}.ReleaseWin32|Any CPU.ActiveCfg = ReleaseWin32|Any CPU
-		{0413DB7D-8B35-423F-9752-D75C9225E7DE}.ReleaseWin32|Any CPU.Build.0 = ReleaseWin32|Any CPU
-		{C2B3C01E-1A8C-4F68-AD7D-F5A0638A7FB5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{C2B3C01E-1A8C-4F68-AD7D-F5A0638A7FB5}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{C2B3C01E-1A8C-4F68-AD7D-F5A0638A7FB5}.DebugGnome|Any CPU.ActiveCfg = Debug|Any CPU
-		{C2B3C01E-1A8C-4F68-AD7D-F5A0638A7FB5}.DebugGnome|Any CPU.Build.0 = Debug|Any CPU
-		{C2B3C01E-1A8C-4F68-AD7D-F5A0638A7FB5}.DebugMac|Any CPU.ActiveCfg = Debug|Any CPU
-		{C2B3C01E-1A8C-4F68-AD7D-F5A0638A7FB5}.DebugMac|Any CPU.Build.0 = Debug|Any CPU
-		{C2B3C01E-1A8C-4F68-AD7D-F5A0638A7FB5}.DebugWin32|Any CPU.ActiveCfg = Debug|Any CPU
-		{C2B3C01E-1A8C-4F68-AD7D-F5A0638A7FB5}.DebugWin32|Any CPU.Build.0 = Debug|Any CPU
-		{C2B3C01E-1A8C-4F68-AD7D-F5A0638A7FB5}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{C2B3C01E-1A8C-4F68-AD7D-F5A0638A7FB5}.Release|Any CPU.Build.0 = Release|Any CPU
-		{C2B3C01E-1A8C-4F68-AD7D-F5A0638A7FB5}.ReleaseGnome|Any CPU.ActiveCfg = Debug|Any CPU
-		{C2B3C01E-1A8C-4F68-AD7D-F5A0638A7FB5}.ReleaseGnome|Any CPU.Build.0 = Debug|Any CPU
-		{C2B3C01E-1A8C-4F68-AD7D-F5A0638A7FB5}.ReleaseMac|Any CPU.ActiveCfg = Debug|Any CPU
-		{C2B3C01E-1A8C-4F68-AD7D-F5A0638A7FB5}.ReleaseMac|Any CPU.Build.0 = Debug|Any CPU
-		{C2B3C01E-1A8C-4F68-AD7D-F5A0638A7FB5}.ReleaseWin32|Any CPU.ActiveCfg = Debug|Any CPU
-		{C2B3C01E-1A8C-4F68-AD7D-F5A0638A7FB5}.ReleaseWin32|Any CPU.Build.0 = Debug|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -2987,8 +2951,6 @@ Global
 
 
 		{0A634A37-FEFB-403E-893E-99DAD6578620} = {A026D596-3C8D-4521-BB42-2C898FA3BE2D}
-		{0413DB7D-8B35-423F-9752-D75C9225E7DE} = {DEEB9163-3966-4E5E-9AB5-FBB3E01AC82A}
-		{C2B3C01E-1A8C-4F68-AD7D-F5A0638A7FB5} = {DEEB9163-3966-4E5E-9AB5-FBB3E01AC82A}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {856CF524-E2A7-4DB0-B80F-8F1B080A2E25}
