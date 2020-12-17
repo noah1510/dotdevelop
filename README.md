@@ -2,7 +2,7 @@
 
 See http://www.monodevelop.com for more info.
 
-[![Build Status](http://jenkins.mono-project.com/job/test-monodevelop-mainline/badge/icon)](http://jenkins.mono-project.com/job/test-monodevelop-mainline/)
+![MonoDevelop](https://github.com/dotdevelop/dotdevelop/workflows/MonoDevelop/badge.svg?branch=dotdevelop_oe_8.4.3.12_NoGit)
 
 [![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/mono/monodevelop?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
