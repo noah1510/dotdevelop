@@ -328,6 +328,8 @@
     <Compile Include="MonoDevelop.Projects.MSBuild\Microsoft.Build\FileUtilities.cs" />
     <Compile Include="MonoDevelop.Projects.MSBuild\Microsoft.Build\IntrinsicFunctions.cs" />
     <Compile Include="MonoDevelop.Projects.MSBuild\Microsoft.Build\IntrinsicFunctions.Extensions.cs" />
+    <Compile Include="MonoDevelop.Projects.MSBuild\Microsoft.Build\NuGetFrameworkWrapper.cs" />
+    <Compile Include="MonoDevelop.Projects.MSBuild\Microsoft.Build\SimpleVersion.cs" />
     <Compile Include="MonoDevelop.Projects\AppliesToAttribute.cs" />
     <Compile Include="MonoDevelop.Projects\ProjectService.cs" />
     <Compile Include="MonoDevelop.Projects\ProjectPathItemPropertyAttribute.cs" />
@@ -780,6 +782,7 @@
     <Content Include="MonoDevelop.Core.dll.config">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="MonoDevelop.Projects.MSBuild\Microsoft.Build\ReadMe.md" />
   </ItemGroup>
   <ItemGroup>
     <InternalsVisibleTo Include="MonoDevelop.Core.Tests" />
