@@ -15,6 +15,7 @@ using System.Text.RegularExpressions;
 
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Utilities;
 using Microsoft.Win32;
 
 using MonoDevelop.Core;
@@ -29,6 +30,8 @@ namespace Microsoft.Build.Evaluation
 	/// </summary>
 	internal static partial class IntrinsicFunctions
 	{
+		private static readonly Lazy<NuGetFrameworkWrapper> NuGetFramework = new Lazy<NuGetFrameworkWrapper>(() => new NuGetFrameworkWrapper());
+
 		/// <summary>
 		/// Add two doubles
 		/// </summary>
@@ -508,6 +511,56 @@ namespace Microsoft.Build.Evaluation
             }
 
             return basekey;
+        }
+
+        internal static bool VersionEquals(string a, string b)
+        {
+	        return SimpleVersion.Parse(a) == SimpleVersion.Parse(b);
+        }
+
+        internal static bool VersionNotEquals(string a, string b)
+        {
+	        return SimpleVersion.Parse(a) != SimpleVersion.Parse(b);
+        }
+
+        internal static bool VersionGreaterThan(string a, string b)
+        {
+	        return SimpleVersion.Parse(a) > SimpleVersion.Parse(b);
+        }
+
+        internal static bool VersionGreaterThanOrEquals(string a, string b)
+        {
+	        return SimpleVersion.Parse(a) >= SimpleVersion.Parse(b);
+        }
+
+        internal static bool VersionLessThan(string a, string b)
+        {
+	        return SimpleVersion.Parse(a) < SimpleVersion.Parse(b);
+        }
+
+        internal static bool VersionLessThanOrEquals(string a, string b)
+        {
+	        return SimpleVersion.Parse(a) <= SimpleVersion.Parse(b);
+        }
+
+        internal static string GetTargetFrameworkVersion(string tfm, int versionPartCount = 2)
+        {
+	        return NuGetFramework.Value.GetTargetFrameworkVersion(tfm, versionPartCount);
+        }
+
+        internal static bool IsTargetFrameworkCompatible(string target, string candidate)
+        {
+	        return NuGetFramework.Value.IsCompatible(target, candidate);
+        }
+
+        internal static string GetTargetPlatformIdentifier(string tfm)
+        {
+	        return NuGetFramework.Value.GetTargetPlatformIdentifier(tfm);
+        }
+
+        internal static string GetTargetPlatformVersion(string tfm, int versionPartCount = 2)
+        {
+	        return NuGetFramework.Value.GetTargetPlatformVersion(tfm, versionPartCount);
         }
 	}
 }
