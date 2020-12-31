@@ -32,6 +32,7 @@ namespace MonoDevelop.DotNetCore
 	static class MonoRuntimeInfoExtensions
 	{
 		static readonly Version MonoVersion5_4 = new Version (5, 4, 0);
+		static readonly Version MonoVersion6_4 = new Version (6, 4, 0);
 		static readonly Version DotNetCore2_1 = new Version (2, 1);
 
 		internal static Version CurrentRuntimeVersion { get; set; } = MonoRuntimeInfo.FromCurrentRuntime ()?.RuntimeVersion ?? new Version ();
@@ -43,8 +44,7 @@ namespace MonoDevelop.DotNetCore
 
 		public static bool SupportsNetStandard21 (this Version monoVersion)
 		{
-			//FIXME: update this: which Mono version will support .NET Standadrd 2.1
-			return false;
+			return monoVersion >= MonoRuntimeInfoExtensions.MonoVersion6_4;
 		}
 
 		public static bool SupportsNetCore (this Version monoVersion, string netCoreVersion)
