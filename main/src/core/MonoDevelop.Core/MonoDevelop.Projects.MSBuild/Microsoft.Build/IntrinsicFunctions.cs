@@ -543,6 +543,11 @@ namespace Microsoft.Build.Evaluation
 	        return SimpleVersion.Parse(a) <= SimpleVersion.Parse(b);
         }
 
+        internal static string GetTargetFrameworkIdentifier(string tfm)
+        {
+	        return NuGetFramework.Value.GetTargetFrameworkIdentifier(tfm);
+        }
+
         internal static string GetTargetFrameworkVersion(string tfm, int versionPartCount = 2)
         {
 	        return NuGetFramework.Value.GetTargetFrameworkVersion(tfm, versionPartCount);
