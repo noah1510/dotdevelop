@@ -26,6 +26,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -321,5 +322,13 @@ namespace MonoDevelop.PackageManagement
 		{
 			return project.BaseDirectory.Combine (relativePath);
 		}
+
+		public override async Task<(IReadOnlyList<PackageSpec> dgSpecs, IReadOnlyList<IAssetsLogMessage> additionalMessages)> GetPackageSpecsAndAdditionalMessagesAsync (DependencyGraphCacheContext context)
+		{
+			//throw new NotImplementedException ();
+			var dgSpecs = await GetPackageSpecsAsync (context);
+			return (dgSpecs, new List<IAssetsLogMessage> ().AsReadOnly ());
+		}
+
 	}
 }
