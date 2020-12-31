@@ -52,7 +52,7 @@ https://github.com/dotdevelop/dotdevelop/wiki
 
 --
 
-# (outdatet) ReadMe from MonoDevelop:
+# (outdated) ReadMe from MonoDevelop:
 
 Directory organization
 ----------------------
