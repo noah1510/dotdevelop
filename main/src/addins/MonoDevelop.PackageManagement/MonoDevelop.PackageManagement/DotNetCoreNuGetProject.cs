@@ -368,5 +368,12 @@ namespace MonoDevelop.PackageManagement
 			// This method is called when adding the packages lock file to the project.
 			return Task.CompletedTask;
 		}
+
+		public override async Task<(IReadOnlyList<PackageSpec> dgSpecs, IReadOnlyList<IAssetsLogMessage> additionalMessages)> GetPackageSpecsAndAdditionalMessagesAsync (DependencyGraphCacheContext context)
+		{
+			//throw new NotImplementedException ();
+			var dgSpecs = await GetPackageSpecsAsync (context);
+			return (dgSpecs, new List<IAssetsLogMessage> ().AsReadOnly ());
+		}
 	}
 }
