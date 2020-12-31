@@ -196,6 +196,8 @@ namespace MonoDevelop.DotNetCore
 					return GetMessage (installedVersion);
 				} else if (installedVersion.Major == 3 && installedVersion < DotNetCoreVersion.MinimumSupportedSdkVersion30) {
 					return GetMessage (installedVersion);
+				} else if (installedVersion.Major == 5 && installedVersion < DotNetCoreVersion.MinimumSupportedSdkVersion50) {
+					return GetMessage (installedVersion);
 				}
 			}
 

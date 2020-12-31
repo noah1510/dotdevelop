@@ -36,10 +36,8 @@ namespace MonoDevelop.DotNetCore
 	{
 		internal static readonly DotNetCoreVersion MinimumSupportedSdkVersion = new DotNetCoreVersion (2, 1, 602);
 		internal static readonly DotNetCoreVersion MinimumSupportedSdkVersion22 = new DotNetCoreVersion (2, 2, 202);
-		internal static readonly DotNetCoreVersion MinimumSupportedSdkVersion30 = new DotNetCoreVersion (3, 0, 100) {
-			ReleaseLabel = "preview3-010431",
-			IsPrerelease = true
-		};
+		internal static readonly DotNetCoreVersion MinimumSupportedSdkVersion30 = new DotNetCoreVersion (3, 1, 101);
+		internal static readonly DotNetCoreVersion MinimumSupportedSdkVersion50 = new DotNetCoreVersion (5, 0, 101);
 
 		internal DotNetCoreVersion (int major, int minor, int patch)
 			: this (new Version (major, minor, patch))
@@ -226,25 +224,15 @@ namespace MonoDevelop.DotNetCore
 			return null;
 		}
 
-		// from 8.1 on, we are only supporting .NET Core SDK based on Nuget 5.0
-		// Minimum SDKs:
-		//			- 2.1.6XX
-		//			- 2.2.2XX
-		//			- 3.0 Preview 3
 		public static bool IsSdkSupported (DotNetCoreVersion version)
 		{
-			if (version.Major == 2) {
-				if (version.Minor == 1)
-					return version >= MinimumSupportedSdkVersion;
-
-				return version >= MinimumSupportedSdkVersion22;
-			}
-
-			if (version.Major == 3) {
-				return version >= MinimumSupportedSdkVersion30;
-			}
-
-			return false;
+			return version.Major switch {
+				2 when version.Minor == 1 => version >= MinimumSupportedSdkVersion,
+				2 => version >= MinimumSupportedSdkVersion22,
+				3 => version >= MinimumSupportedSdkVersion30,
+				5 => version >= MinimumSupportedSdkVersion50,
+				_ => false
+			};
 		}
 	}
 }
