@@ -10,8 +10,6 @@ This branch is based on the last commit on 29 Jan 2020 (https://github.com/mono/
 
 It was refactored to compile / run again on linux. Other platforms will follow.
 
-Missing: currently the Git-Addin fails to compile on most plattforms.
-
 **Contributors**
 
 to hack around, get a compiling copy as follows:
