@@ -9,13 +9,13 @@ This is an effort to get monodevelop open sourced again.
 
 Currently the best working branch is:
 
- https://github.com/dotdevelop/dotdevelop/tree/dotdevelop_oe_8.4.3.12_NoGit
+https://github.com/dotdevelop/dotdevelop/tree/dotdevelop_oe_8.6
 
 
-To hack around on version 8.4.3.12, get a compiling copy from branch dotdevelop_oe_8.4.3.12_NoGit as follows:
+To hack around on version 8.6, get a compiling copy from branch dotdevelop_oe_8.6 as follows:
 
 ```
-git clone -b dotdevelop_oe_8.4.3.12_NoGit https://github.com/dotdevelop/dotdevelop.git
+git clone -b dotdevelop_oe_8.6 https://github.com/dotdevelop/dotdevelop.git
 
 cd dotdevelop/
 
