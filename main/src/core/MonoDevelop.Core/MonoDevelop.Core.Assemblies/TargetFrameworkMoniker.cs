@@ -1,21 +1,21 @@
-﻿// 
+﻿//
 // TargetFrameworkMoniker.cs
-//  
+//
 // Author:
 //       Michael Hutchinson <mhutchinson@novell.com>
-// 
+//
 // Copyright (c) 2011 Novell, Inc.
-// 
+//
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
 // in the Software without restriction, including without limitation the rights
 // to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 // copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions:
-// 
+//
 // The above copyright notice and this permission notice shall be included in
 // all copies or substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 // FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -40,48 +40,48 @@ namespace MonoDevelop.Core.Assemblies
 	public class TargetFrameworkMoniker : IEquatable<TargetFrameworkMoniker>, IComparable<TargetFrameworkMoniker>
 	{
 		string identifier, version, profile, shortName;
-		
+
 		TargetFrameworkMoniker ()
 		{
 		}
-		
+
 		public TargetFrameworkMoniker (string version) : this (ID_NET_FRAMEWORK, version, null)
 		{
 		}
-		
+
 		public TargetFrameworkMoniker (string identifier, string version) : this (identifier, version, null)
 		{
 		}
-		
+
 		public TargetFrameworkMoniker (string identifier, string version, string profile)
 		{
 			if (version == null || version.Length == 0 || (version.Length == 1 && version[0] == 'v'))
 				throw new ArgumentException ("A version must be provided", "version");
-			
+
 			if (string.IsNullOrEmpty (identifier))
 				throw new ArgumentException ("An identifier must be provided", "identifier");
-			
+
 			if (version[0] == 'v')
 				version = version.Substring (1);
-			
+
 			if (profile != null & profile == "")
 				profile = null;
-			
+
 			this.identifier = identifier;
 			this.version = version;
 			this.profile = profile;
 		}
-		
+
 		/// <summary>
 		/// The root identifier of the framework, e.g. ".NETFramework" or "Silverlight"
 		/// </summary>
 		public string Identifier { get { return identifier; } }
-		
+
 		/// <summary>
 		/// The version of the framework.
 		/// </summary>
 		public string Version { get { return version; } }
-		
+
 		/// <summary>
 		/// Optional. A named subset of a particular framework version, e.g. "Client".
 		/// </summary>
@@ -116,13 +116,13 @@ namespace MonoDevelop.Core.Assemblies
 			moniker = null;
 			return false;
 		}
-		
+
 		bool ParseInternal (string value)
 		{
 			profile = null;
-			
+
 			int i = value.IndexOf (',');
-			
+
 			//HACK: this isn't strictly valid but it makes back-compat a lot easier
 			if (i < 1) {
 				if (value == "SL2.0") {
@@ -165,7 +165,7 @@ namespace MonoDevelop.Core.Assemblies
 			Version v;
 			return System.Version.TryParse (version, out v);
 		}
-		
+
 		internal string ToLegacyIdString ()
 		{
 			if (identifier == ID_SILVERLIGHT && (version == "2.0" || version == "3.0"))
@@ -177,7 +177,7 @@ namespace MonoDevelop.Core.Assemblies
 			else
 				return ToString ();
 		}
-		
+
 		public override string ToString ()
 		{
 			string val = identifier + ",Version=v" + version;
@@ -197,17 +197,17 @@ namespace MonoDevelop.Core.Assemblies
 			}
 			return cachedAssemblyDirectoryName;
 		}
-		
+
 		public bool Equals (TargetFrameworkMoniker other)
 		{
 			return other != null && identifier == other.identifier && version == other.version && profile == other.profile;
 		}
-		
+
 		public override bool Equals (object obj)
 		{
 			return Equals (obj as TargetFrameworkMoniker);
 		}
-		
+
 		public override int GetHashCode ()
 		{
 			int ret = 0;
@@ -219,14 +219,14 @@ namespace MonoDevelop.Core.Assemblies
 				ret ^= profile.GetHashCode ();
 			return ret;
 		}
-		
+
 		public static bool operator == (TargetFrameworkMoniker a, TargetFrameworkMoniker b)
 		{
 			if (((object)a) == null)
 				return ((object)b) == null;
 			return a.Equals (b);
 		}
-		
+
 		public static bool operator != (TargetFrameworkMoniker a, TargetFrameworkMoniker b)
 		{
 			if (((object)a) == null)
@@ -295,23 +295,23 @@ namespace MonoDevelop.Core.Assemblies
 		public static TargetFrameworkMoniker Default {
 			get { return NET_1_1; }
 		}
-		
+
 		public static TargetFrameworkMoniker NET_1_1 {
 			get { return new TargetFrameworkMoniker ("1.1"); }
 		}
-		
+
 		public static TargetFrameworkMoniker NET_2_0 {
 			get { return new TargetFrameworkMoniker ("2.0"); }
 		}
-		
+
 		public static TargetFrameworkMoniker NET_3_0 {
 			get { return new TargetFrameworkMoniker ("3.0"); }
 		}
-		
+
 		public static TargetFrameworkMoniker NET_3_5 {
 			get { return new TargetFrameworkMoniker ("3.5"); }
 		}
-		
+
 		public static TargetFrameworkMoniker NET_4_0 {
 			get { return new TargetFrameworkMoniker ("4.0"); }
 		}
@@ -344,52 +344,56 @@ namespace MonoDevelop.Core.Assemblies
 			get { return new TargetFrameworkMoniker ("4.7.2"); }
 		}
 
+		public static TargetFrameworkMoniker NET_4_8 {
+			get { return new TargetFrameworkMoniker ("4.8"); }
+		}
+
 		public static TargetFrameworkMoniker PORTABLE_4_0 {
 			get { return new TargetFrameworkMoniker (ID_PORTABLE, "4.0", "Profile1"); }
 		}
-		
+
 		public static TargetFrameworkMoniker SL_2_0 {
 			get { return new TargetFrameworkMoniker (ID_SILVERLIGHT, "2.0"); }
 		}
-		
+
 		public static TargetFrameworkMoniker SL_3_0 {
 			get { return new TargetFrameworkMoniker (ID_SILVERLIGHT, "3.0"); }
 		}
-		
+
 		public static TargetFrameworkMoniker SL_4_0 {
 			get { return new TargetFrameworkMoniker (ID_SILVERLIGHT, "4.0"); }
 		}
-		
+
 		public static TargetFrameworkMoniker MONOTOUCH_1_0 {
 			get { return new TargetFrameworkMoniker (ID_MONOTOUCH, "1.0"); }
 		}
-		
+
 		public static TargetFrameworkMoniker UNKNOWN {
 			get { return new TargetFrameworkMoniker ("Unknown", "0.0"); }
 		}
-		
+
 		public const string ID_NET_FRAMEWORK = ".NETFramework";
 		public const string ID_SILVERLIGHT = "Silverlight";
 		public const string ID_PORTABLE = ".NETPortable";
 		public const string ID_MONOTOUCH = "MonoTouch";
 		public const string ID_MONODROID = "MonoAndroid";
 	}
-	
+
 	class TargetFrameworkMonikerDataType: DataType
 	{
 		public TargetFrameworkMonikerDataType (Type dataType) : base (dataType)
 		{
 		}
-		
+
 		public override bool IsSimpleType { get { return true; } }
 		public override bool CanCreateInstance { get { return true; } }
 		public override bool CanReuseInstance { get { return false; } }
-		
+
 		internal protected override DataNode OnSerialize (SerializationContext serCtx, object mapData, object value)
 		{
 			return new DataValue (Name, ((TargetFrameworkMoniker)value).ToString ());
 		}
-		
+
 		internal protected override object OnDeserialize (SerializationContext serCtx, object mapData, DataNode data)
 		{
 			return TargetFrameworkMoniker.Parse (((DataValue)data).Value);
