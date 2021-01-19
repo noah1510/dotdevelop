@@ -1,23 +1,23 @@
-// 
+//
 // MonoTargetRuntime.cs
-//  
+//
 // Author:
 //   Todd Berman <tberman@sevenl.net>
 //   Lluis Sanchez Gual <lluis@novell.com>
 //
 // Copyright (C) 2004 Todd Berman
 // Copyright (C) 2005 Novell, Inc (http://www.novell.com)
-// 
+//
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
 // in the Software without restriction, including without limitation the rights
 // to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 // copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions:
-// 
+//
 // The above copyright notice and this permission notice shall be included in
 // all copies or substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 // FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -48,11 +48,11 @@ namespace MonoDevelop.Core.Assemblies
 		readonly string monoVersion,  monoDir;
 		MonoPlatformExecutionHandler execHandler;
 		readonly Dictionary<string,string> environmentVariables;
-		
+
 		internal static LibraryPcFileCache PcFileCache = new LibraryPcFileCache (new PcFileCacheContext ());
-		
+
 		readonly MonoRuntimeInfo monoRuntimeInfo;
-		
+
 		internal MonoTargetRuntime (MonoRuntimeInfo info)
 		{
 			this.monoVersion = info.MonoVersion;
@@ -60,42 +60,42 @@ namespace MonoDevelop.Core.Assemblies
 			environmentVariables = info.GetEnvironmentVariables ();
 			monoRuntimeInfo = info;
 		}
-		
+
 		public MonoRuntimeInfo MonoRuntimeInfo {
 			get { return monoRuntimeInfo; }
 		}
-		
+
 		public string Prefix {
 			get { return monoRuntimeInfo.Prefix; }
 		}
-		
+
 		public string MonoDirectory {
 			get { return monoDir; }
 		}
-		
+
 		public Dictionary<string,string> EnvironmentVariables {
 			get { return environmentVariables; }
 		}
 
-		
+
 		public override bool IsRunning {
 			get {
 				return monoRuntimeInfo.IsRunning;
 			}
 		}
-		
+
 		public override string RuntimeId {
 			get {
 				return "Mono";
 			}
 		}
-		
+
 		public override string Version {
 			get {
 				return monoVersion;
 			}
 		}
-		
+
 		public override string DisplayName {
 			get {
 				if (!IsRunning)
@@ -134,13 +134,13 @@ namespace MonoDevelop.Core.Assemblies
 				return Path.ChangeExtension (assemblyPath, ".pdb");
 			return assemblyPath + ".mdb";
 		}
-		
+
 		protected override TargetFrameworkBackend CreateBackend (TargetFramework fx)
 		{
 			return new MonoFrameworkBackend ();
 		}
 
-		
+
 		public override IExecutionHandler GetExecutionHandler ()
 		{
 			if (execHandler == null) {
@@ -148,7 +148,7 @@ namespace MonoDevelop.Core.Assemblies
 			}
 			return execHandler;
 		}
-		
+
 		protected override void ConvertAssemblyProcessStartInfo (ProcessStartInfo pinfo)
 		{
 			pinfo.Arguments = "\"" + pinfo.FileName + "\" " + pinfo.Arguments;
@@ -163,11 +163,11 @@ namespace MonoDevelop.Core.Assemblies
 				toolName = "al2";
 			return base.GetToolPath (fx, toolName);
 		}
-		
+
 		internal protected override IEnumerable<string> GetGacDirectories ()
 		{
 			yield return Path.Combine (monoDir, "gac");
-			
+
 			string gacs;
 			if (environmentVariables.TryGetValue ("MONO_GAC_PREFIX", out gacs)) {
 				if (string.IsNullOrEmpty (gacs))
@@ -176,16 +176,30 @@ namespace MonoDevelop.Core.Assemblies
 					yield return path;
 			}
 		}
-		
+
 		public override string GetMSBuildBinPath (string toolsVersion)
 		{
+			string path = MonoTargetRuntime.GetPackageMSBuildRuntimeBinPath();
+			if (File.Exists (Path.Combine (path, "MSBuild.exe")) ||
+			    File.Exists(Path.Combine(path, "MSBuild.dll")))
+			{
+				return path;
+			}
+
 			if (toolsVersion != "Current") {
-				var path = GetMSBuildBinPathInternal ("Current");
+				path = GetMSBuildBinPathInternal ("Current");
 				if (path != null)
 					return path;
 			}
 			return GetMSBuildBinPathInternal (toolsVersion);
 		}
+
+		/// <summary>
+		/// Path to MsBuild integrated with package Microsoft.Build.Runtime
+		/// </summary>
+		/// <returns></returns>
+		private static FilePath GetPackageMSBuildRuntimeBinPath () =>
+			new FilePath (typeof(MonoTargetRuntime).Assembly.Location).ParentDirectory.Combine ("MSBuild", "Current", "bin");
 
 		string GetMSBuildBinPathInternal (string toolsVersion)
 		{
@@ -197,10 +211,15 @@ namespace MonoDevelop.Core.Assemblies
 
 			return null;
 		}
-		
+
 		public override string GetMSBuildToolsPath (string toolsVersion)
 		{
-			var path = Path.Combine (monoDir, "msbuild", toolsVersion, "bin");
+			string path = MonoTargetRuntime.GetPackageMSBuildRuntimeBinPath();
+			if (Directory.Exists(path))
+			{
+				return path;
+			}
+			path = Path.Combine (monoDir, "msbuild", toolsVersion, "bin");
 			if (Directory.Exists (path))
 				return path;
 
@@ -211,7 +230,7 @@ namespace MonoDevelop.Core.Assemblies
 		{
 			return Path.Combine (monoDir, "xbuild");
 		}
-		
+
 		public IEnumerable<string> PkgConfigDirs {
 			get { return GetPkgConfigDirs (IsInitialized || IsRunning); }
 		}
@@ -223,7 +242,7 @@ namespace MonoDevelop.Core.Assemblies
 			if (includeGlobalDirectories && Platform.IsMac)
 				yield return "/Library/Frameworks/Mono.framework/External/pkgconfig";
 		}
-		
+
 		public string PkgConfigPath {
 			get { return environmentVariables ["PKG_CONFIG_PATH"]; }
 		}
@@ -250,7 +269,7 @@ namespace MonoDevelop.Core.Assemblies
 						yield return pcfile;
 			}
 		}
-		
+
 		protected override void OnInitialize ()
 		{
 			if (!monoRuntimeInfo.IsValidRuntime)
@@ -288,12 +307,12 @@ namespace MonoDevelop.Core.Assemblies
 				RuntimeAssemblyContext.RegisterPackage (pinfo, false);
 		}
 
-		
+
 		public static TargetRuntime RegisterRuntime (MonoRuntimeInfo info)
 		{
 			return MonoTargetRuntimeFactory.RegisterRuntime (info);
 		}
-		
+
 		public static void UnregisterRuntime (MonoTargetRuntime runtime)
 		{
 			MonoTargetRuntimeFactory.UnregisterRuntime (runtime);
@@ -342,7 +361,7 @@ namespace MonoDevelop.Core.Assemblies
 		{
 			LoggingService.LogError (message, ex);
 		}
-		
+
 		public bool IsCustomDataComplete (string pcfile, LibraryPackageInfo pkg)
 		{
 			string fx = pkg.GetData ("targetFramework");
@@ -350,12 +369,12 @@ namespace MonoDevelop.Core.Assemblies
 			// The 'unknown' check was added here to force a re-scan of .pc files
 			// which resulted in unknown framework version due to a bug
 		}
-		
+
 		public void StoreCustomData (PcFile pcfile, LibraryPackageInfo pinfo)
 		{
 			TargetFramework commonFramework = null;
 			bool inconsistentFrameworks = false;
-			
+
 			foreach (PackageAssemblyInfo pi in pinfo.Assemblies) {
 				TargetFrameworkMoniker targetFramework = Runtime.SystemAssemblyService.GetTargetFrameworkForAssembly (Runtime.SystemAssemblyService.CurrentRuntime, pi.File);
 				if (commonFramework == null) {

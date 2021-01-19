@@ -563,9 +563,15 @@ namespace Microsoft.Build.Evaluation
 	        return NuGetFramework.Value.GetTargetPlatformIdentifier(tfm);
         }
 
-        internal static string GetTargetPlatformVersion(string tfm, int versionPartCount = 2)
+        internal static string GetTargetPlatformVersion(string tfm, int versionPartCount)
         {
 	        return NuGetFramework.Value.GetTargetPlatformVersion(tfm, versionPartCount);
         }
+
+        internal static string GetTargetPlatformVersion(string tfm)
+        {
+	        return GetTargetPlatformVersion(tfm, 2);
+        }
+
 	}
 }

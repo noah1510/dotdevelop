@@ -183,6 +183,11 @@ namespace MonoDevelop.Core.Assemblies
 			TargetFramework fx;
 			if (frameworks.TryGetValue (id, out fx))
 				return fx;
+			if (IsKnownMissingFramework (id)) {
+				var framework = new TargetFramework (id);
+				UpdateFrameworks (new[] {framework});
+				return framework;
+			}
 
 			LoggingService.LogDebug ("Unknown TargetFramework '{0}' is being requested from SystemAssemblyService, ensuring runtimes initialized and trying again", id);
 			foreach (var r in runtimes)
@@ -190,10 +195,20 @@ namespace MonoDevelop.Core.Assemblies
 			if (frameworks.TryGetValue (id, out fx))
 				return fx;
 
-			
+
 			LoggingService.LogWarning ("Unknown TargetFramework '{0}' is being requested from SystemAssemblyService, returning empty TargetFramework", id);
 			UpdateFrameworks (new [] { new TargetFramework (id) });
 			return frameworks [id];
+		}
+
+		/// <summary>
+		/// Treat .NETCoreApp, .NETStandard and .NETFramework 1.1 as known frameworks that are missing.
+		/// This avoids the initialization of all runtimes during project load. The main runtime will be initialized
+		/// in the background when the IDE starts anyway.
+		/// </summary>
+		private static bool IsKnownMissingFramework(TargetFrameworkMoniker id)
+		{
+			return id.Identifier == ".NETStandard" || id.Identifier == ".NETCoreApp" || (id.Identifier == ".NETFramework" && id.Version == "1.1");
 		}
 
 		public SystemPackage GetPackageFromPath (string assemblyPath)

@@ -60,22 +60,22 @@
     <Reference Include="System.Web" />
     <Reference Include="System.ServiceModel" />
     <Reference Include="Microsoft.CSharp" />
-    <Reference Include="Microsoft.Build">
-      <Private>False</Private>
-      <HintPath>$(MSBuildToolsPath)\Microsoft.Build.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.Build.Framework">
-      <Private>False</Private>
-      <HintPath>$(MSBuildToolsPath)\Microsoft.Build.Framework.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.Build.Utilities.Core">
-      <Private>False</Private>
-      <HintPath>$(MSBuildToolsPath)\Microsoft.Build.Utilities.Core.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.Build.Tasks.Core">
-      <HintPath>$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
+<!--    <Reference Include="Microsoft.Build">-->
+<!--      <Private>False</Private>-->
+<!--      <HintPath>$(MSBuildToolsPath)\Microsoft.Build.dll</HintPath>-->
+<!--    </Reference>-->
+<!--    <Reference Include="Microsoft.Build.Framework">-->
+<!--      <Private>False</Private>-->
+<!--      <HintPath>$(MSBuildToolsPath)\Microsoft.Build.Framework.dll</HintPath>-->
+<!--    </Reference>-->
+<!--    <Reference Include="Microsoft.Build.Utilities.Core">-->
+<!--      <Private>False</Private>-->
+<!--      <HintPath>$(MSBuildToolsPath)\Microsoft.Build.Utilities.Core.dll</HintPath>-->
+<!--    </Reference>-->
+<!--    <Reference Include="Microsoft.Build.Tasks.Core">-->
+<!--      <HintPath>$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll</HintPath>-->
+<!--      <Private>False</Private>-->
+<!--    </Reference>-->
     <Reference Include="monodoc, Version=1.0.0.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756" />
     <Reference Include="System" />
     <Reference Include="System.IO.FileSystem" />
@@ -85,6 +85,7 @@
     <!-- disable this for now, it's absurdly noisy
     <PackageReference Include="ClrHeapAllocationAnalyzer" Version="1.0.0.9" />
     -->
+    <PackageReference Include="Microsoft.Build.Runtime" Version="16.8.0" ExcludeAssets="runtime" PrivateAssets="all" GeneratePathProperty="true"/>
     <PackageReference Include="Microsoft.Build.Locator" Version="1.3.2" PrivateAssets="runtime" />
     <PackageReference Include="Microsoft.CodeAnalysis.EditorFeatures" Version="$(NuGetVersionRoslyn)" PrivateAssets="runtime" />
     <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.MSBuild" Version="$(NuGetVersionRoslyn)" PrivateAssets="runtime" />
@@ -110,6 +111,12 @@
     <PackageReference Include="Microsoft.VisualStudio.Threading.Analyzers" Version="16.3.52" ExcludeAssets="all" />
     <PackageReference Include="Microsoft.Extensions.ObjectPool" Version="3.0.0-preview9.19423.4" PrivateAssets="runtime" />
   </ItemGroup>
+  <Target Name="CopyMsBuildRuntime" AfterTargets="Build">
+    <ItemGroup>
+      <Files Include="$(PkgMicrosoft_Build_Runtime)\contentFiles\any\net472\**" />
+    </ItemGroup>
+    <Copy SourceFiles="@(Files)" DestinationFolder="$(OutputPath)\MSBuild\Current\bin\%(RecursiveDir)" SkipUnchangedFiles="true" />
+  </Target>
   <ItemGroup>
     <IncludeCopyLocal Include="Humanizer.dll" />
     <IncludeCopyLocal Include="ICSharpCode.Decompiler.dll" />
