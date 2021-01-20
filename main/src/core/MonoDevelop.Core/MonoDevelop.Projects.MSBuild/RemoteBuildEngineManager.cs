@@ -29,9 +29,11 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Xml.Linq;
+using Microsoft.Build.Tasks;
 using MonoDevelop.Core;
 using MonoDevelop.Core.Assemblies;
 using MonoDevelop.Core.Execution;
@@ -460,14 +462,17 @@ namespace MonoDevelop.Projects.MSBuild
 			throw new InvalidOperationException ($"Did not find MSBuild builder '{exe}'");
 		}
 
+		/// <summary>
+		/// Gets a path to the local copy of the project builder for the provided runtime.
+		/// If no local copy exists, create one.
+		///  Builders are copied to a folder inside the cache folder. This folder is cleaned
+		/// every time XS is started, removing unused builders. The process id is used
+		/// as folder name, so it is easy to check if the folder is currently in use or not.
+		/// </summary>
+		/// <param name="runtime"></param>
+		/// <returns></returns>
 		static string GetLocalMSBuildExeLocation (TargetRuntime runtime)
 		{
-			// Gets a path to the local copy of the project builder for the provided runtime.
-			// If no local copy exists, create one.
-
-			// Builders are copied to a folder inside the cache folder. This folder is cleaned
-			// every time XS is started, removing unused builders. The process id is used
-			// as folder name, so it is easy to check if the folder is currently in use or not.
 
 			var dirId = Process.GetCurrentProcess ().Id.ToString () + "_" + runtime.InternalId;
 			var exesDir = UserProfile.Current.CacheDir.Combine ("MSBuild").Combine (dirId);
@@ -509,6 +514,7 @@ namespace MonoDevelop.Projects.MSBuild
 					PatchNuGetSdkResolver (binDir, localResolversDir);
 				}
 
+				CopyDependentAssemblies (binDir, exesDir);
 				searchPathConfigNeedsUpdate = true;
 			}
 
@@ -518,6 +524,55 @@ namespace MonoDevelop.Projects.MSBuild
 				UpdateMSBuildExeConfigFile (runtime, originalExeConfig, destinationExeConfig, mdResolverConfig, binDir);
 			}
 			return destinationExe;
+		}
+
+		static void CopyDependentAssemblies (string binDir, FilePath exesDir)
+		{
+			var currentDomainBaseDirectory =
+				AppDomain.CurrentDomain.BaseDirectory.TrimEnd (Path.DirectorySeparatorChar);
+			var assembliesToCopy = new HashSet<string> ();
+			try {
+				var currentDomainAssemblies = AppDomain.CurrentDomain.GetAssemblies ().ToArray ()
+					.Where (a => !a.IsDynamic && a?.Location != null &&
+					             Path.GetDirectoryName (a.Location) == currentDomainBaseDirectory)
+					.ToArray ();
+				var currentDomainDllss = Directory.GetFiles (currentDomainBaseDirectory, "*.dll")
+					.ToArray ();
+
+				void AddAssembly (AssemblyName ass)
+				{
+					if (!assembliesToCopy.Contains (ass.Name) &&
+					    currentDomainDllss.FirstOrDefault (d => Path.GetFileNameWithoutExtension (d) == ass.Name) is var
+						    refAss) {
+						if (refAss == null) return;
+						assembliesToCopy.Add (ass.Name);
+						AddRefAssemblies (refAss);
+					}
+				}
+
+				void AddRefAssemblies (string f)
+				{
+					foreach (var a in System.Reflection.Assembly.ReflectionOnlyLoadFrom (f)?.GetReferencedAssemblies ()) {
+						AddAssembly (a);
+					}
+				}
+
+				foreach (var f in Directory.GetFiles (binDir, "*.dll")) {
+					AddRefAssemblies (f);
+				}
+
+				foreach (var f in assembliesToCopy) {
+					var fn = $"{f}.dll";
+					var sf = Path.Combine (currentDomainBaseDirectory, fn);
+					var df = exesDir.Combine (Path.GetFileName (fn));
+					if (File.Exists (sf) && !File.Exists (df))
+						File.Copy (sf, df);
+
+				}
+			} catch (Exception ex) {
+				;
+			}
+
 		}
 
 		static void CopyMonoDevelopResolver (string mdResolverDir)
@@ -658,7 +713,7 @@ namespace MonoDevelop.Projects.MSBuild
 					try {
 						if (Platform.IsWindows) {
 							// Avoid a common first-chance ArgumentException on Windows.
-							// It's better to take a small perf hit on Windows then to 
+							// It's better to take a small perf hit on Windows then to
 							// hit this exception every time during debugging.
 							if (Process.GetProcesses().Any(p => p.Id == pid)) {
 								continue;
