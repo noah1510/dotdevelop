@@ -20,6 +20,8 @@ namespace MonoDevelop.Projects.MSBuild
 		{
 		}
 
+		// TODO: fix this: sarch in exesDir, not in bindir for unresolved ReferencedAssemblies
+		// do this on a per file basis, and resolve file per file
 		public static void CopyDependentAssemblies (string binDir, FilePath exesDir)
 		{
 			var currentDomainBaseDirectory =
@@ -30,13 +32,13 @@ namespace MonoDevelop.Projects.MSBuild
 					.Where (a => !a.IsDynamic && a?.Location != null &&
 					             Path.GetDirectoryName (a.Location) == currentDomainBaseDirectory)
 					.ToArray ();
-				var currentDomainDllss = Directory.GetFiles (currentDomainBaseDirectory, "*.dll")
+				var currentDomainDlls = Directory.GetFiles (currentDomainBaseDirectory, "*.dll")
 					.ToArray ();
 
 				void AddAssembly (AssemblyName ass)
 				{
 					if (!assembliesToCopy.Contains (ass.Name) &&
-					    currentDomainDllss.FirstOrDefault (d => Path.GetFileNameWithoutExtension (d) == ass.Name) is var
+					    currentDomainDlls.FirstOrDefault (d => Path.GetFileNameWithoutExtension (d) == ass.Name) is var
 						    refAss) {
 						if (refAss == null) return;
 						assembliesToCopy.Add (ass.Name);
