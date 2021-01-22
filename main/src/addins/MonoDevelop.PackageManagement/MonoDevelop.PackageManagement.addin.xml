@@ -74,7 +74,7 @@
 			_displayName="Retarget All Packages" />
 		</Category>
 	</Extension>
-	
+
 	<Extension path="/MonoDevelop/Ide/MainMenu/Project">
 		<SeparatorItem insertafter="MonoDevelop.Ide.Commands.ProjectCommands.AddReference" />
 		<CommandItem id="MonoDevelop.PackageManagement.Commands.ManageNuGetPackages" />
@@ -82,7 +82,7 @@
 		<CommandItem id="MonoDevelop.PackageManagement.Commands.RestorePackages" />
 		<SeparatorItem />
 	</Extension>
-	
+
 	<Extension path="/MonoDevelop/Ide/ContextMenu/ProjectPad">
 		<Condition id="ItemType" value="Solution">
 			<SeparatorItem
@@ -128,12 +128,12 @@
 		<Condition id="ItemType" value="Project">
 			<CommandItem
 				id="MonoDevelop.PackageManagement.Commands.AddPackages"
-				_label = "NuGet _Packages..."				
+				_label = "NuGet _Packages..."
 				insertafter="MonoDevelop.Ide.Commands.ProjectCommands.AddReference"
 				insertbefore="MonoDevelop.WebReferences.WebReferenceCommands.Add" />
 		</Condition>
 	</Extension>
-	
+
 	<Extension path="/MonoDevelop/Core/StockIcons">
 		<StockIcon stockid="md-nuget-package" resource="package-48.png" />
 		<StockIcon stockid="md-nuget-package-source" resource="package-source-32.png" size="Dnd" />
@@ -200,13 +200,17 @@
 		<Class class="MonoDevelop.PackageManagement.Refactoring.PackageCodeDiagnosticProvider" />
 	</Extension>-->
 
-	<Extension path="/MonoDevelop/Core/SystemInformation"> 
-		<Class class="MonoDevelop.PackageManagement.NuGetSystemInformation" /> 
+	<Extension path="/MonoDevelop/Core/SystemInformation">
+		<Class class="MonoDevelop.PackageManagement.NuGetSystemInformation" />
 	</Extension>
 
 	<Extension path="/MonoDevelop/Ide/FileTemplateConditionTypes">
 		<FileTemplateConditionType
 			name="HasPackageOrReference"
 			class="MonoDevelop.PackageManagement.HasNuGetPackageOrReferenceFileTemplateCondition" />
+	</Extension>
+
+	<Extension path="/MonoDevelop/ProjectModel/RemoteBuildDependencies">
+		<Class id="NuGet" class="MonoDevelop.PackageManagement.NuGetRemoteBuildDependencies" />
 	</Extension>
 </ExtensionModel>

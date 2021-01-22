@@ -34,6 +34,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using Microsoft.Build.Tasks;
+using Mono.Addins;
 using MonoDevelop.Core;
 using MonoDevelop.Core.Assemblies;
 using MonoDevelop.Core.Execution;
@@ -94,6 +95,9 @@ namespace MonoDevelop.Projects.MSBuild
 		static RemoteBuildEngineManager ()
 		{
 			CleanCachedMSBuildExes ();
+			AddinManager.ExtensionChanged += OnExtensionChanged;
+			LoadRemoteBuildDependencies();
+
 			MSBuildProjectService.GlobalPropertyProvidersChanged += HandleGlobalPropertyProviderChanged;
 			MSBuildProjectService.ImportSearchPathsChanged += (s, e) => {
 				// Reload all builders since search paths have changed
@@ -132,6 +136,23 @@ namespace MonoDevelop.Projects.MSBuild
 		{
 			using (await buildersLock.EnterAsync ().ConfigureAwait (false)) {
 				return builders.GetAllBuilders ().Count (b => b.IsProjectLoaded (projectFile));
+			}
+		}
+
+		private static string RemoteBuildDependenciesAddinPath = $"/MonoDevelop/ProjectModel/{nameof(RemoteBuildDependencies)}";
+
+		private static IEnumerable<RemoteBuildDependencies> remoteBuildDependencies;
+
+		private static void LoadRemoteBuildDependencies()
+		{
+			remoteBuildDependencies = AddinManager.GetExtensionObjects<RemoteBuildDependencies>(RemoteBuildDependenciesAddinPath);
+		}
+
+		private static void OnExtensionChanged(object sender, ExtensionEventArgs args)
+		{
+			if (args.Path == RemoteBuildDependenciesAddinPath)
+			{
+				LoadRemoteBuildDependencies();
 			}
 		}
 
@@ -514,7 +535,13 @@ namespace MonoDevelop.Projects.MSBuild
 					PatchNuGetSdkResolver (binDir, localResolversDir);
 				}
 
-				CopyDependentAssemblies (binDir, exesDir);
+				RemoteBuildDependencies.CopyDependentAssemblies (binDir, exesDir);
+
+				foreach (RemoteBuildDependencies buildDependencies in remoteBuildDependencies)
+				{
+					buildDependencies.Resolve(exesDir);
+				}
+
 				searchPathConfigNeedsUpdate = true;
 			}
 
@@ -524,55 +551,6 @@ namespace MonoDevelop.Projects.MSBuild
 				UpdateMSBuildExeConfigFile (runtime, originalExeConfig, destinationExeConfig, mdResolverConfig, binDir);
 			}
 			return destinationExe;
-		}
-
-		static void CopyDependentAssemblies (string binDir, FilePath exesDir)
-		{
-			var currentDomainBaseDirectory =
-				AppDomain.CurrentDomain.BaseDirectory.TrimEnd (Path.DirectorySeparatorChar);
-			var assembliesToCopy = new HashSet<string> ();
-			try {
-				var currentDomainAssemblies = AppDomain.CurrentDomain.GetAssemblies ().ToArray ()
-					.Where (a => !a.IsDynamic && a?.Location != null &&
-					             Path.GetDirectoryName (a.Location) == currentDomainBaseDirectory)
-					.ToArray ();
-				var currentDomainDllss = Directory.GetFiles (currentDomainBaseDirectory, "*.dll")
-					.ToArray ();
-
-				void AddAssembly (AssemblyName ass)
-				{
-					if (!assembliesToCopy.Contains (ass.Name) &&
-					    currentDomainDllss.FirstOrDefault (d => Path.GetFileNameWithoutExtension (d) == ass.Name) is var
-						    refAss) {
-						if (refAss == null) return;
-						assembliesToCopy.Add (ass.Name);
-						AddRefAssemblies (refAss);
-					}
-				}
-
-				void AddRefAssemblies (string f)
-				{
-					foreach (var a in System.Reflection.Assembly.ReflectionOnlyLoadFrom (f)?.GetReferencedAssemblies ()) {
-						AddAssembly (a);
-					}
-				}
-
-				foreach (var f in Directory.GetFiles (binDir, "*.dll")) {
-					AddRefAssemblies (f);
-				}
-
-				foreach (var f in assembliesToCopy) {
-					var fn = $"{f}.dll";
-					var sf = Path.Combine (currentDomainBaseDirectory, fn);
-					var df = exesDir.Combine (Path.GetFileName (fn));
-					if (File.Exists (sf) && !File.Exists (df))
-						File.Copy (sf, df);
-
-				}
-			} catch (Exception ex) {
-				;
-			}
-
 		}
 
 		static void CopyMonoDevelopResolver (string mdResolverDir)

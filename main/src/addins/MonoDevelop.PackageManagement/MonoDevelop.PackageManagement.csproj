@@ -73,6 +73,7 @@
     <Compile Include="MonoDevelop.PackageManagement\LicenseAcceptanceViewModel.cs" />
     <Compile Include="MonoDevelop.PackageManagement\MonoDevelopCredentialProvider.cs" />
     <Compile Include="MonoDevelop.PackageManagement\MSBuildProjectExtensions.cs" />
+    <Compile Include="MonoDevelop.PackageManagement\NuGetRemoteBuildDependencies.cs" />
     <Compile Include="MonoDevelop.PackageManagement\PackageLicenseViewModel.cs" />
     <Compile Include="MonoDevelop.PackageManagement\PackageManagementOptionsViewModel.cs" />
     <Compile Include="MonoDevelop.PackageManagement\PackageManagementTask.cs" />

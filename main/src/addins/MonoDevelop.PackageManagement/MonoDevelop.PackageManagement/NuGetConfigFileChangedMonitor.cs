@@ -31,6 +31,7 @@ using NuGet.Configuration;
 
 namespace MonoDevelop.PackageManagement
 {
+
 	class NuGetConfigFileChangedMonitor
 	{
 		public void MonitorFileChanges ()
